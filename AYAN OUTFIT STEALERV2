@@ -343,7 +343,6 @@ local plr = Players:GetPlayerFromCharacter(character)
 if plr and (string.find(plr.Name:lower(), tag) or string.find(plr.DisplayName:lower(), tag)) then
 return true
 end
-
 for _, attr in pairs(character:GetAttributes()) do
 if type(attr) == "string" and string.find(attr:lower(), tag) then
 return true
@@ -404,8 +403,8 @@ local anims = {
 {"Swim", desc.SwimAnimation}
 }
 for _, anim in ipairs(anims) do
-if anim and anim ~= 0 then
-createItemCard("[Anim: " .. anim[1, .. "]", anim)
+if anim[2] and anim[2] ~= 0 then
+createItemCard("[Anim: " .. anim[1] .. "]", anim[2])
 end
 end
 local bodyParts = {
@@ -417,8 +416,8 @@ local bodyParts = {
 {"RightLeg", desc.RightLeg}
 }
 for _, body in ipairs(bodyParts) do
-if body and body ~= 0 then
-createItemCard("[Body: " .. body[1, .. "]", body)
+if body[2] and body[2] ~= 0 then
+createItemCard("[Body: " .. body[1] .. "]", body[2])
 end
 end
 RevealBtn.Text = "REVEAL IDs"
@@ -505,7 +504,6 @@ task.wait(0.2)
 Net.send("skin_tone", 0.6, 0.6, 0.6)
 end)
 task.wait(0.6)
-
 local humanoid = targetChar:FindFirstChildOfClass("Humanoid")
 if humanoid then
 local desc = humanoid:GetAppliedDescription()
@@ -541,8 +539,8 @@ local animsAndBody = {
 {"RightLeg", desc.RightLeg}
 }
 for _, item in ipairs(animsAndBody) do
-if item and item ~= 0 then
-addItem(item, item[1])
+if item[2] and item[2] ~= 0 then
+addItem(item[2], item[1])
 end
 end
 for idx, item in ipairs(itemsToApply) do
