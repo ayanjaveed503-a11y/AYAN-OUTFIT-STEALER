@@ -1,5 +1,5 @@
--- Life Together Ultimate Alphanumeric JSON Parser & Outfit Manager
--- Delta Executor Optimized GUI | Advanced Raw Asset Extraction Framework
+-- Life Together Ultimate JSON Data Outfit Manager
+-- Optimized for Delta Executor | Based on Native Core Data Logic
 
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
@@ -8,16 +8,16 @@ local HttpService = game:GetService("HttpService")
 local MarketplaceService = game:GetService("MarketplaceService")
 
 local LocalPlayer = Players.LocalPlayer
-local FILE_NAME = "LifeTogether_AlphanumericOutfits.json"
+local FILE_NAME = "LifeTogether_AlphaNativeOutfits.json"
 
--- Existing GUI Cleanup
+-- Clean old instances
 for _, gui in ipairs(CoreGui:GetChildren()) do
     if gui.Name == "LT_AlphaOutfitGui" then
         gui:Destroy()
     end
 end
 
--- GUI Interface Design
+-- GUI Main Root Structure
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "LT_AlphaOutfitGui"
 ScreenGui.ResetOnSpawn = false
@@ -50,7 +50,7 @@ local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, -50, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "OUTFIT GAME-CODE ANALYZER 📱"
+Title.Text = "OUTFIT NATIVE ANALYZER 📱"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 13
@@ -75,7 +75,7 @@ CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- Inputs
+-- Inputs (Classic Panel Style)
 local NameInput = Instance.new("TextBox")
 NameInput.Size = UDim2.new(0.9, 0, 0, 36)
 NameInput.Position = UDim2.new(0.05, 0, 0, 60)
@@ -90,16 +90,13 @@ NameInput.Parent = MainFrame
 local NamePadding = Instance.new("UIPadding")
 NamePadding.PaddingLeft = UDim.new(0, 10)
 NamePadding.Parent = NameInput
-
-local NameCorner = Instance.new("UICorner")
-NameCorner.CornerRadius = UDim.new(0, 6)
-NameCorner.Parent = NameInput
+Instance.new("UICorner", NameInput).CornerRadius = UDim.new(0, 6)
 
 local CodeInput = Instance.new("TextBox")
 CodeInput.Size = UDim2.new(0.9, 0, 0, 36)
 CodeInput.Position = UDim2.new(0.05, 0, 0, 105)
 CodeInput.BackgroundColor3 = Color3.fromRGB(32, 39, 53)
-CodeInput.PlaceholderText = "Paste Game Outfit Code (e.g., E6VE7RB)..."
+CodeInput.PlaceholderText = "Paste Game Outfit Code String..."
 CodeInput.Text = ""
 CodeInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 CodeInput.Font = Enum.Font.GothamBold
@@ -109,12 +106,9 @@ CodeInput.Parent = MainFrame
 local CodePadding = Instance.new("UIPadding")
 CodePadding.PaddingLeft = UDim.new(0, 10)
 CodePadding.Parent = CodeInput
+Instance.new("UICorner", CodeInput).CornerRadius = UDim.new(0, 6)
 
-local CodeCorner = Instance.new("UICorner")
-CodeCorner.CornerRadius = UDim.new(0, 6)
-CodeCorner.Parent = CodeInput
-
--- Analyze & Save Button
+-- Main Trigger Action Button
 local SaveBtn = Instance.new("TextButton")
 SaveBtn.Size = UDim2.new(0.9, 0, 0, 38)
 SaveBtn.Position = UDim2.new(0.05, 0, 0, 150)
@@ -124,12 +118,9 @@ SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 SaveBtn.Font = Enum.Font.GothamBold
 SaveBtn.TextSize = 12
 SaveBtn.Parent = MainFrame
+Instance.new("UICorner", SaveBtn).CornerRadius = UDim.new(0, 6)
 
-local SaveBtnCorner = Instance.new("UICorner")
-SaveBtnCorner.CornerRadius = UDim.new(0, 6)
-SaveBtnCorner.Parent = SaveBtn
-
--- Scroll Content List for Saved Outfits
+-- Scroller layout for profiles list
 local ScrollFrame = Instance.new("ScrollingFrame")
 ScrollFrame.Size = UDim2.new(0.9, 0, 0, 200)
 ScrollFrame.Position = UDim2.new(0.05, 0, 0, 200)
@@ -147,10 +138,10 @@ ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 10)
 end)
 
--- Chhota side panel (Open & Close Toggle Feature)
+-- Chhota side panel (Smart Toggle Layer Window)
 local MiniOpenPanel = Instance.new("Frame")
 MiniOpenPanel.Size = UDim2.new(0, 250, 0, 300)
-MiniOpenPanel.Position = UDim2.new(1, 10, 0, 50) -- Main Frame ke right side attach hoga
+MiniOpenPanel.Position = UDim2.new(1, 10, 0, 50)
 MiniOpenPanel.BackgroundColor3 = Color3.fromRGB(25, 30, 43)
 MiniOpenPanel.BorderSizePixel = 0
 MiniOpenPanel.Visible = false
@@ -184,7 +175,7 @@ MiniListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function(
     MiniScroll.CanvasSize = UDim2.new(0, 0, 0, MiniListLayout.AbsoluteContentSize.Y + 5)
 end)
 
--- Storage Engine
+-- Storage Infrastructure 
 local StorageData = { outfits = {} }
 local currentActiveOutfitIdx = nil
 
@@ -203,76 +194,34 @@ local function saveStorage()
 end
 
 local function getNetModule()
-    local success, net = pcall(function() 
-        return require(ReplicatedStorage.Modules.Core.Net) 
-    end)
+    local success, net = pcall(function() return require(ReplicatedStorage.Modules.Core.Net) end)
     return success and net or nil
 end
 
--- ADVANCED JSON EXTRACTOR: Deep table analyzer framework to capture everything inside image #2 structure
-local function cleanAndParseServerResponse(rawResponse)
-    local validatedItems = {}
-
-    if type(rawResponse) == "table" then
-        -- Agar game direct raw dict arrays de raha ho (Screenshot 2 array structure format)
-        local rawList = rawResponse.items or rawResponse.Items or rawResponse.accessories
-        if rawList and type(rawList) == "table" then
-            for _, itemBlock in ipairs(rawList) do
-                if type(itemBlock) == "table" and itemBlock.id then
-                    table.insert(validatedItems, {
-                        id = tonumber(itemBlock.id),
-                        category = tostring(itemBlock.category or "Accessory")
-                    })
-                elseif tonumber(itemBlock) then
-                    table.insert(validatedItems, { id = tonumber(itemBlock), category = "Accessory" })
-                end
-            end
-        end
-
-        -- Direct root level parameters mapping fallback
-        if rawResponse.Shirt and tonumber(rawResponse.Shirt) ~= 0 then
-            table.insert(validatedItems, { id = tonumber(rawResponse.Shirt), category = "Shirt" })
-        end
-        if rawResponse.Pants and tonumber(rawResponse.Pants) ~= 0 then
-            table.insert(validatedItems, { id = tonumber(rawResponse.Pants), category = "Pants" })
-        end
-    end
-
-    return validatedItems
-end
-
--- Network Code Fetcher Engine
-local function fetchAndAnalyzeGameCode(gameCode)
-    local Net = getNetModule()
-    if not Net then return nil end
-
-    local outfitData = nil
-    pcall(function()
-        outfitData = Net.get("GetOutfit", gameCode) or Net.get("outfits", "get", gameCode)
+-- HUB NATIVE MODULE EXTRACER: Core Data table module lookup mapping injection
+local function scanNativeGameDataModule()
+    local success, coreData = pcall(function()
+        return require(ReplicatedStorage.Modules.Core.Data)
     end)
-
-    if not outfitData then
-        pcall(function()
-            outfitData = ReplicatedStorage.Remotes.GetOutfit:InvokeServer(gameCode)
-        end)
+    if success and coreData and coreData.outfits then
+        return coreData.outfits
     end
-
-    return cleanAndParseServerResponse(outfitData)
+    return nil
 end
 
--- Ultimate Native Event Wear Framework (Line-by-Line Stable Extraction Engine)
+-- Native Remotes Interaction Engine (Fixed Line-by-Line Synchronous Wear Loop)
 local function applyGameOutfitStructure(itemsArray)
     local Net = getNetModule()
     if not Net then return end
 
-    -- Step 1: Force Clear Character State Completely
+    -- Step 1: Empty Character State Global State Wipe
     pcall(function()
         Net.send("ClearOutfit")
         Net.send("wear_outfit_from_desc", { ["accessories"] = {}, ["properties"] = { ["Shirt"] = 0, ["Pants"] = 0 } })
     end)
     task.wait(0.5)
 
-    -- Step 2: High Security Native Categorized Remotes Loop
+    -- Step 2: High Security Structural Delay Array Firing Cycle
     if type(itemsArray) == "table" then
         for _, item in ipairs(itemsArray) do
             local assetId = tonumber(item.id)
@@ -280,48 +229,52 @@ local function applyGameOutfitStructure(itemsArray)
 
             if assetId and assetId ~= 0 then
                 pcall(function()
-if category == "Shirt" or category == "T-Shirt" then
-Net.send("UpdateOutfit", "Shirt", assetId)
-Net.get("code", assetId, "Shirt")
-elseif category == "Pants" or category == "Shorts" then
-Net.send("UpdateOutfit", "Pants", assetId)
-Net.get("code", assetId, "Pants")
-else
--- Default everything else safely into Accessories/Hair/Hats slots
-Net.send("UpdateOutfit", "Accessory", assetId)
-Net.get("code", assetId, "Accessory")
+                    if category:lower() == "shirt" or category:lower() == "t-shirt" or category:lower() == "jacket" then
+                        Net.send("UpdateOutfit", "Shirt", assetId)
+                        Net.get("code", assetId, "Shirt")
+                    elseif category:lower() == "pants" or category:lower() == "shorts" then
+                        Net.send("UpdateOutfit", "Pants", assetId)
+                        Net.get("code", assetId, "Pants")
+                    else
+                        -- Fallback for hats, hairs, face masks, back items, etc.
+                        Net.send("UpdateOutfit", "Accessory", assetId)
+                        Net.get("code", assetId, "Accessory")
+                    end
+                end)
+                task.wait(0.25)
+            end
+        end
+        pcall(function() Net.send("RefreshCharacter") end)
+    end
 end
-end)
-task.wait(0.25) -- Safe synchronous loading delay
-end
-end
-pcall(function() Net.send("RefreshCharacter") end)
-end
-end
--- Render items list with Names + Copy ID inside Mini Box
+
+-- Populate items rows list inside the side toggle sub-panel window frame
 local function popMiniPanelItems(itemsArray)
-for _, child in pairs(MiniScroll:GetChildren()) do
-if child:IsA("Frame") then child:Destroy() end
-end
-if type(itemsArray) ~= "table" or #itemsArray == 0 then
-local fallbackLabel = Instance.new("TextLabel", MiniScroll)
-fallbackLabel.Size = UDim2.new(1,0,0,30)
-fallbackLabel.BackgroundTransparency = 1
-fallbackLabel.Text = "No items extracted or code empty!"
-fallbackLabel.TextColor3 = Color3.fromRGB(231, 76, 60)
-fallbackLabel.Font = Enum.Font.GothamMedium
-fallbackLabel.TextSize = 10
-return
-end
-for _, item in ipairs(itemsArray) do
-local labelType = tostring(item.category or "Item")
-local assetId = tonumber(item.id)
-local itemRow = Instance.new("Frame")
-itemRow.Size = UDim2.new(1, -4, 0, 40)
-itemRow.BackgroundColor3 = Color3.fromRGB(34, 41, 56)
-itemRow.Parent = MiniScroll
-Instance.new("UICorner", itemRow).CornerRadius = UDim.new(0, 5)
--- Mini square layout image preview
+    for _, child in pairs(MiniScroll:GetChildren()) do
+        if child:IsA("Frame") then child:Destroy() end
+    end
+
+    if type(itemsArray) ~= "table" or #itemsArray == 0 then
+        local fallbackLabel = Instance.new("TextLabel", MiniScroll)
+        fallbackLabel.Size = UDim2.new(1, 0, 0, 30)
+        fallbackLabel.BackgroundTransparency = 1
+        fallbackLabel.Text = "No component items mapped in array!"
+        fallbackLabel.TextColor3 = Color3.fromRGB(231, 76, 60)
+        fallbackLabel.Font = Enum.Font.GothamMedium
+        fallbackLabel.TextSize = 10
+        return
+    end
+
+    for _, item in ipairs(itemsArray) do
+        local labelType = tostring(item.category or "Asset")
+        local assetId = tonumber(item.id)
+
+        local itemRow = Instance.new("Frame")
+        itemRow.Size = UDim2.new(1, -4, 0, 40)
+        itemRow.BackgroundColor3 = Color3.fromRGB(34, 41, 56)
+        itemRow.Parent = MiniScroll
+        Instance.new("UICorner", itemRow).CornerRadius = UDim.new(0, 5)
+-- Mini square visual display preview layout thumb
 local img = Instance.new("ImageLabel")
 img.Size = UDim2.new(0, 30, 0, 30)
 img.Position = UDim2.new(0, 5, 0, 5)
@@ -329,19 +282,19 @@ img.BackgroundColor3 = Color3.fromRGB(20, 24, 33)
 img.Image = "rbxthumb://type=Asset&id=" .. tostring(assetId) .. "&w=150&h=150"
 img.Parent = itemRow
 Instance.new("UICorner", img).CornerRadius = UDim.new(0, 4)
--- Name tracking labels
+-- Text label for full catalog titles
 local txt = Instance.new("TextLabel")
 txt.Size = UDim2.new(1, -70, 1, 0)
 txt.Position = UDim2.new(0, 40, 0, 0)
 txt.BackgroundTransparency = 1
-txt.Text = labelType .. ": Loading Full Name..."
+txt.Text = labelType .. ": Fetching product name..."
 txt.TextColor3 = Color3.fromRGB(240, 240, 240)
 txt.Font = Enum.Font.GothamMedium
 txt.TextSize = 8
 txt.TextWrapped = true
 txt.TextXAlignment = Enum.TextXAlignment.Left
 txt.Parent = itemRow
--- Copy ID Button Setup (Side of name)
+-- Dedicated COPY ID Action Control Module Button
 local cp = Instance.new("TextButton")
 cp.Size = UDim2.new(0, 24, 0, 24)
 cp.Position = UDim2.new(1, -28, 0, 8)
@@ -372,8 +325,7 @@ end
 end)
 end
 end
-
--- GUI Display List Compiler
+-- Render interface profiles mappings compiler
 local renderManagerPanel
 renderManagerPanel = function()
 for _, child in pairs(ScrollFrame:GetChildren()) do
@@ -389,7 +341,7 @@ local nameLabel = Instance.new("TextLabel")
 nameLabel.Size = UDim2.new(0.4, -5, 0, 22)
 nameLabel.Position = UDim2.new(0, 10, 0, 4)
 nameLabel.BackgroundTransparency = 1
-nameLabel.Text = data.name or "Saved Outfit"
+nameLabel.Text = data.name or "Saved Profile"
 nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 nameLabel.Font = Enum.Font.GothamBold
 nameLabel.TextSize = 11
@@ -405,7 +357,7 @@ codeLabel.Font = Enum.Font.GothamMedium
 codeLabel.TextSize = 10
 codeLabel.TextXAlignment = Enum.TextXAlignment.Left
 codeLabel.Parent = cardFrame
--- 1. OPEN Button with Toggle Operations (Open -> Tap Again -> Close)
+-- 1. OPEN Button (Smart Toggle Operation Setup Frame)
 local openBtn = Instance.new("TextButton")
 openBtn.Size = UDim2.new(0, 48, 0, 26)
 openBtn.Position = UDim2.new(1, -154, 0, 12)
@@ -426,6 +378,7 @@ MiniOpenPanel.Visible = true
 popMiniPanelItems(data.structureData)
 end
 end)
+
 -- 2. WEAR Button
 local wearBtn = Instance.new("TextButton")
 wearBtn.Size = UDim2.new(0, 48, 0, 26)
@@ -467,33 +420,71 @@ renderManagerPanel()
 end)
 end
 end
--- Save Trigger
+-- Save Button Initialization Trigger Logic
 SaveBtn.MouseButton1Click:Connect(function()
 local nameText = NameInput.Text
 local codeText = string.upper(string.gsub(CodeInput.Text, "%s+", ""))
 if nameText == "" or codeText == "" then return end
-SaveBtn.Text = "PARSING SERVER DATA TABLES..."
+SaveBtn.Text = "SCANNING INTERNAL DATA ARRAYS..."
 SaveBtn.BackgroundColor3 = Color3.fromRGB(230, 126, 34)
--- Injected Data Parser Execution block
-local elementsFound = fetchAndAnalyzeGameCode(codeText)
-if not elementsFound or #elementsFound == 0 then
--- Backup array generation safety parameters
-elementsFound = {}
+local parsedItems = {}
+-- Game Core Data modules require lookups ka automated hook scanning cycle
+local nativeOutfits = scanNativeGameDataModule()
+if nativeOutfits and type(nativeOutfits) == "table" then
+for _, nativeGroup in pairs(nativeOutfits) do
+if type(nativeGroup) == "table" and nativeGroup.items then
+for _, itemBlock in ipairs(nativeGroup.items) do
+if itemBlock.id then
+table.insert(parsedItems, {
+id = tonumber(itemBlock.id),
+category = tostring(itemBlock.category or "Accessory")
+})
+end
+end
+end
+end
+end
+-- Server Remote fallback sequence router block if core scanning registers zero length
+if #parsedItems == 0 then
+local Net = getNetModule()
+if Net then
+local success, serverData = pcall(function()
+return Net.get("GetOutfit", codeText) or ReplicatedStorage.Remotes.GetOutfit:InvokeServer(codeText)
+end)
+if success and type(serverData) == "table" then
+local rawList = serverData.items or serverData.Items or serverData.accessories
+if type(rawList) == "table" then
+for _, node in ipairs(rawList) do
+if type(node) == "table" and node.id then
+table.insert(parsedItems, { id = tonumber(node.id), category = tostring(node.category or "Accessory") })
+elseif tonumber(node) then
+table.insert(parsedItems, { id = tonumber(node), category = "Accessory" })
+end
+end
+end
+if serverData.Shirt and tonumber(serverData.Shirt) ~= 0 then
+table.insert(parsedItems, { id = tonumber(serverData.Shirt), category = "Shirt" })
+end
+if serverData.Pants and tonumber(serverData.Pants) ~= 0 then
+table.insert(parsedItems, { id = tonumber(serverData.Pants), category = "Pants" })
+end
+end
+end
 end
 table.insert(StorageData.outfits, {
 name = nameText,
 code = codeText,
-structureData = elementsFound
+structureData = parsedItems
 })
 saveStorage()
 renderManagerPanel()
 NameInput.Text = ""
 CodeInput.Text = ""
-SaveBtn.Text = "OUTFIT SCAN & SAVE COMPLETE! ✓"
+SaveBtn.Text = "OUTFIT SAVED SUCCESSFULLY! ✓"
 SaveBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
 task.wait(1.5)
 SaveBtn.Text = "ANALYSE GAME CODE & SAVE"
 end)
--- Initialize System
+-- Initialize Framework
 loadStorage()
 renderManagerPanel()
