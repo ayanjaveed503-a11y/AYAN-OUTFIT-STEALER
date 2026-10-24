@@ -1,5 +1,5 @@
--- Life Together Custom Code Alphanumeric Analyzer & Storage
--- Delta Executor Optimized GUI | Fixed Ultimate Wear & Toggle Details View Engine
+-- Life Together Ultimate Alphanumeric JSON Parser & Outfit Manager
+-- Delta Executor Optimized GUI | Advanced Raw Asset Extraction Framework
 
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
@@ -149,7 +149,7 @@ end)
 
 -- Chhota side panel (Open & Close Toggle Feature)
 local MiniOpenPanel = Instance.new("Frame")
-MiniOpenPanel.Size = UDim2.new(0, 240, 0, 300)
+MiniOpenPanel.Size = UDim2.new(0, 250, 0, 300)
 MiniOpenPanel.Position = UDim2.new(1, 10, 0, 50) -- Main Frame ke right side attach hoga
 MiniOpenPanel.BackgroundColor3 = Color3.fromRGB(25, 30, 43)
 MiniOpenPanel.BorderSizePixel = 0
@@ -186,7 +186,7 @@ end)
 
 -- Storage Engine
 local StorageData = { outfits = {} }
-local currentActiveOutfitIdx = nil -- Track karne ke liye kaunsa outfit open hai
+local currentActiveOutfitIdx = nil
 
 local function loadStorage()
     if readfile and isfile and isfile(FILE_NAME) then
@@ -209,6 +209,38 @@ local function getNetModule()
     return success and net or nil
 end
 
+-- ADVANCED JSON EXTRACTOR: Deep table analyzer framework to capture everything inside image #2 structure
+local function cleanAndParseServerResponse(rawResponse)
+    local validatedItems = {}
+
+    if type(rawResponse) == "table" then
+        -- Agar game direct raw dict arrays de raha ho (Screenshot 2 array structure format)
+        local rawList = rawResponse.items or rawResponse.Items or rawResponse.accessories
+        if rawList and type(rawList) == "table" then
+            for _, itemBlock in ipairs(rawList) do
+                if type(itemBlock) == "table" and itemBlock.id then
+                    table.insert(validatedItems, {
+                        id = tonumber(itemBlock.id),
+                        category = tostring(itemBlock.category or "Accessory")
+                    })
+                elseif tonumber(itemBlock) then
+                    table.insert(validatedItems, { id = tonumber(itemBlock), category = "Accessory" })
+                end
+            end
+        end
+
+        -- Direct root level parameters mapping fallback
+        if rawResponse.Shirt and tonumber(rawResponse.Shirt) ~= 0 then
+            table.insert(validatedItems, { id = tonumber(rawResponse.Shirt), category = "Shirt" })
+        end
+        if rawResponse.Pants and tonumber(rawResponse.Pants) ~= 0 then
+            table.insert(validatedItems, { id = tonumber(rawResponse.Pants), category = "Pants" })
+        end
+    end
+
+    return validatedItems
+end
+
 -- Network Code Fetcher Engine
 local function fetchAndAnalyzeGameCode(gameCode)
     local Net = getNetModule()
@@ -225,73 +257,65 @@ local function fetchAndAnalyzeGameCode(gameCode)
         end)
     end
 
-    return outfitData
+    return cleanAndParseServerResponse(outfitData)
 end
 
--- Ultimate Native Event Wear Framework (Line-by-Line Stable Engine)
-local function applyGameOutfitStructure(outfitStructure)
+-- Ultimate Native Event Wear Framework (Line-by-Line Stable Extraction Engine)
+local function applyGameOutfitStructure(itemsArray)
     local Net = getNetModule()
     if not Net then return end
 
-    -- Step 1: Force Clear Character State
+    -- Step 1: Force Clear Character State Completely
     pcall(function()
         Net.send("ClearOutfit")
         Net.send("wear_outfit_from_desc", { ["accessories"] = {}, ["properties"] = { ["Shirt"] = 0, ["Pants"] = 0 } })
     end)
     task.wait(0.5)
 
-    -- Step 2: High Security Structural Deployment
-    if type(outfitStructure) == "table" then
-        if outfitStructure.Shirt and tonumber(outfitStructure.Shirt) ~= 0 then
-            pcall(function() Net.send("UpdateOutfit", "Shirt", tonumber(outfitStructure.Shirt)) end)
-            pcall(function() Net.get("code", tonumber(outfitStructure.Shirt), "Shirt") end)
-            task.wait(0.25)
-        end
-        
-        if outfitStructure.Pants and tonumber(outfitStructure.Pants) ~= 0 then
-            pcall(function() Net.send("UpdateOutfit", "Pants", tonumber(outfitStructure.Pants)) end)
-            pcall(function() Net.get("code", tonumber(outfitStructure.Pants), "Pants") end)
-            task.wait(0.25)
-        end
+    -- Step 2: High Security Native Categorized Remotes Loop
+    if type(itemsArray) == "table" then
+        for _, item in ipairs(itemsArray) do
+            local assetId = tonumber(item.id)
+            local category = tostring(item.category or "Accessory")
 
-        local list = outfitStructure.accessories or outfitStructure.Items
-        if list and type(list) == "table" then
-            for _, accId in ipairs(list) do
-                if tonumber(accId) ~= 0 then
-                    pcall(function() Net.send("UpdateOutfit", "Accessory", tonumber(accId)) end)
-                    pcall(function() Net.get("code", tonumber(accId), "Accessory") end)
-                    task.wait(0.25)
-                end
-            end
-        end
-        pcall(function() Net.send("RefreshCharacter") end)
-    end
+            if assetId and assetId ~= 0 then
+                pcall(function()
+if category == "Shirt" or category == "T-Shirt" then
+Net.send("UpdateOutfit", "Shirt", assetId)
+Net.get("code", assetId, "Shirt")
+elseif category == "Pants" or category == "Shorts" then
+Net.send("UpdateOutfit", "Pants", assetId)
+Net.get("code", assetId, "Pants")
+else
+-- Default everything else safely into Accessories/Hair/Hats slots
+Net.send("UpdateOutfit", "Accessory", assetId)
+Net.get("code", assetId, "Accessory")
 end
-
+end)
+task.wait(0.25) -- Safe synchronous loading delay
+end
+end
+pcall(function() Net.send("RefreshCharacter") end)
+end
+end
 -- Render items list with Names + Copy ID inside Mini Box
-local function popMiniPanelItems(outfitStructure)
-    for _, child in pairs(MiniScroll:GetChildren()) do
-        if child:IsA("Frame") then child:Destroy() end
-    end
-
-    if type(outfitStructure) ~= "table" then return end
-
-    local renderQueue = {}
-    if outfitStructure.Shirt and tonumber(outfitStructure.Shirt) ~= 0 then
-        table.insert(renderQueue, {"Shirt", tonumber(outfitStructure.Shirt)})
-    end
-    if outfitStructure.Pants and tonumber(outfitStructure.Pants) ~= 0 then
-    table.insert(renderQueue, {"Pants", tonumber(outfitStructure.Pants)})
+local function popMiniPanelItems(itemsArray)
+for _, child in pairs(MiniScroll:GetChildren()) do
+if child:IsA("Frame") then child:Destroy() end
 end
-local list = outfitStructure.accessories or outfitStructure.Items
-if list and type(list) == "table" then
-for _, id in ipairs(list) do
-if tonumber(id) ~= 0 then table.insert(renderQueue, {"Accessory", tonumber(id)}) end
+if type(itemsArray) ~= "table" or #itemsArray == 0 then
+local fallbackLabel = Instance.new("TextLabel", MiniScroll)
+fallbackLabel.Size = UDim2.new(1,0,0,30)
+fallbackLabel.BackgroundTransparency = 1
+fallbackLabel.Text = "No items extracted or code empty!"
+fallbackLabel.TextColor3 = Color3.fromRGB(231, 76, 60)
+fallbackLabel.Font = Enum.Font.GothamMedium
+fallbackLabel.TextSize = 10
+return
 end
-end
-for _, asset in ipairs(renderQueue) do
-local labelType = asset[1]
-local assetId = asset[2]
+for _, item in ipairs(itemsArray) do
+local labelType = tostring(item.category or "Item")
+local assetId = tonumber(item.id)
 local itemRow = Instance.new("Frame")
 itemRow.Size = UDim2.new(1, -4, 0, 40)
 itemRow.BackgroundColor3 = Color3.fromRGB(34, 41, 56)
@@ -310,7 +334,7 @@ local txt = Instance.new("TextLabel")
 txt.Size = UDim2.new(1, -70, 1, 0)
 txt.Position = UDim2.new(0, 40, 0, 0)
 txt.BackgroundTransparency = 1
-txt.Text = labelType .. ": Loading..."
+txt.Text = labelType .. ": Loading Full Name..."
 txt.TextColor3 = Color3.fromRGB(240, 240, 240)
 txt.Font = Enum.Font.GothamMedium
 txt.TextSize = 8
@@ -394,11 +418,9 @@ openBtn.Parent = cardFrame
 Instance.new("UICorner", openBtn).CornerRadius = UDim.new(0, 4)
 openBtn.MouseButton1Click:Connect(function()
 if MiniOpenPanel.Visible and currentActiveOutfitIdx == idx then
--- Agar wahi panel pehle se khula hai toh band kar do (Toggle Close)
 MiniOpenPanel.Visible = false
 currentActiveOutfitIdx = nil
 else
--- Naya panel kholo ya data switch karo (Toggle Open)
 currentActiveOutfitIdx = idx
 MiniOpenPanel.Visible = true
 popMiniPanelItems(data.structureData)
@@ -450,22 +472,24 @@ SaveBtn.MouseButton1Click:Connect(function()
 local nameText = NameInput.Text
 local codeText = string.upper(string.gsub(CodeInput.Text, "%s+", ""))
 if nameText == "" or codeText == "" then return end
-SaveBtn.Text = "FETCHING GAME DATABASE..."
+SaveBtn.Text = "PARSING SERVER DATA TABLES..."
 SaveBtn.BackgroundColor3 = Color3.fromRGB(230, 126, 34)
-local serverStructure = fetchAndAnalyzeGameCode(codeText)
-if not serverStructure then
-serverStructure = { Shirt = 0, Pants = 0, accessories = {} }
+-- Injected Data Parser Execution block
+local elementsFound = fetchAndAnalyzeGameCode(codeText)
+if not elementsFound or #elementsFound == 0 then
+-- Backup array generation safety parameters
+elementsFound = {}
 end
 table.insert(StorageData.outfits, {
 name = nameText,
 code = codeText,
-structureData = serverStructure
+structureData = elementsFound
 })
 saveStorage()
 renderManagerPanel()
 NameInput.Text = ""
 CodeInput.Text = ""
-SaveBtn.Text = "OUTFIT SAVED SUCCESSFULLY! ✓"
+SaveBtn.Text = "OUTFIT SCAN & SAVE COMPLETE! ✓"
 SaveBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
 task.wait(1.5)
 SaveBtn.Text = "ANALYSE GAME CODE & SAVE"
