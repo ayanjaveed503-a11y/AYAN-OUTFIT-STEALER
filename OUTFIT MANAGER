@@ -1,5 +1,6 @@
 -- Life Together Live Character Scanner & Outfit Storage Engine
 -- Delta Executor Optimized GUI | Pure Character Asset Scan System
+-- Modified & Enhanced by ZM_AYANUU Custom Branding Framework
 
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
@@ -10,7 +11,7 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local LocalPlayer = Players.LocalPlayer
 local FILE_NAME = "LifeTogether_LiveScannedOutfits.json"
 
--- Existing GUI Cleanup to prevent overlapping
+-- Existing GUI Cleanup to prevent overlapping instances
 for _, gui in ipairs(CoreGui:GetChildren()) do
     if gui.Name == "LT_LiveScannerGui" then
         gui:Destroy()
@@ -36,7 +37,7 @@ local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 10)
 MainCorner.Parent = MainFrame
 
--- Header Title TopBar
+-- Header Title TopBar (ZM_AYANUU Custom Branding Name Injection)
 local TopBar = Instance.new("Frame")
 TopBar.Size = UDim2.new(1, 0, 0, 45)
 TopBar.BackgroundColor3 = Color3.fromRGB(28, 34, 46)
@@ -51,7 +52,7 @@ local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, -50, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "LIVE AVATAR FIT SCANNER 🧠"
+Title.Text = "MADE BY ZM_AYANUU 👑"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 13
@@ -160,9 +161,62 @@ MiniListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function(
     MiniScroll.CanvasSize = UDim2.new(0, 0, 0, MiniListLayout.AbsoluteContentSize.Y + 5)
 end)
 
+-- Central Confirmation Warning Pop-Up Frame Setup
+local WarnFrame = Instance.new("Frame")
+WarnFrame.Size = UDim2.new(0, 240, 0, 120)
+WarnFrame.Position = UDim2.new(0.5, -120, 0.5, -60)
+WarnFrame.BackgroundColor3 = Color3.fromRGB(33, 39, 52)
+WarnFrame.BorderSizePixel = 0
+WarnFrame.ZIndex = 50
+WarnFrame.Visible = false
+WarnFrame.Parent = MainFrame
+Instance.new("UICorner", WarnFrame).CornerRadius = UDim.new(0, 8)
+
+local WarnStroke = Instance.new("UIStroke")
+WarnStroke.Thickness = 1.5
+WarnStroke.Color = Color3.fromRGB(231, 76, 60)
+WarnStroke.Parent = WarnFrame
+
+local WarnLabel = Instance.new("TextLabel")
+WarnLabel.Size = UDim2.new(1, -20, 0, 50)
+WarnLabel.Position = UDim2.new(0, 10, 0, 10)
+WarnLabel.BackgroundTransparency = 1
+WarnLabel.Text = "Are you sure you want to delete this outfit?"
+WarnLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+WarnLabel.Font = Enum.Font.GothamBold
+WarnLabel.TextSize = 11
+WarnLabel.TextWrapped = true
+WarnLabel.ZIndex = 51
+WarnLabel.Parent = WarnFrame
+
+local YesBtn = Instance.new("TextButton")
+YesBtn.Size = UDim2.new(0, 95, 0, 30)
+YesBtn.Position = UDim2.new(0, 15, 1, -40)
+YesBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
+YesBtn.Text = "YES"
+YesBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+YesBtn.Font = Enum.Font.GothamBold
+YesBtn.TextSize = 11
+YesBtn.ZIndex = 51
+YesBtn.Parent = WarnFrame
+Instance.new("UICorner", YesBtn).CornerRadius = UDim.new(0, 5)
+
+local NoBtn = Instance.new("TextButton")
+NoBtn.Size = UDim2.new(0, 95, 0, 30)
+NoBtn.Position = UDim2.new(1, -110, 1, -40)
+NoBtn.BackgroundColor3 = Color3.fromRGB(231, 76, 60)
+NoBtn.Text = "NO"
+NoBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+NoBtn.Font = Enum.Font.GothamBold
+NoBtn.TextSize = 11
+NoBtn.ZIndex = 51
+NoBtn.Parent = WarnFrame
+Instance.new("UICorner", NoBtn).CornerRadius = UDim.new(0, 5)
+
 -- Local JSON Save Infrastructure
 local StorageData = { outfits = {} }
 local currentActiveOutfitIdx = nil
+local pendingDeleteIdx = nil
 
 local function loadStorage()
     if readfile and isfile and isfile(FILE_NAME) then
@@ -183,7 +237,7 @@ local function getNetModule()
     return success and net or nil
 end
 
--- Line-by-Line Asset Wear Router (Fixed Delay System)
+-- Line-by-Line Asset Wear Router (Fixed Super Delay System - One-by-One Copy Loading Fix)
 local function applyGameOutfitStructure(itemsArray)
     local Net = getNetModule()
     if not Net then return end
@@ -217,54 +271,47 @@ local function applyGameOutfitStructure(itemsArray)
                     else
                         Net.send("UpdateOutfit", "Accessory", assetId)
                         Net.get("code", assetId, "Accessory")
-                    end
-                end)
-                task.wait(0.25) -- Continuous delivery throttle buffer sync delay
-            end
-        end
-        pcall(function() Net.send("RefreshCharacter") end)
-    end
 end
-
+end)
+task.wait(0.35) -- Safe synchronization loop interval delay block to prevent throttle skipping
+end
+end
+pcall(function() Net.send("RefreshCharacter") end)
+end
+end
 -- Display Item Catalog Row Inside Toggle Subpanel Frame Window
 local function popMiniPanelItems(itemsArray)
-    for _, child in pairs(MiniScroll:GetChildren()) do
-        if child:IsA("Frame") then child:Destroy() end
-    end
-
-    if type(itemsArray) ~= "table" or #itemsArray == 0 then return end
-
-    for _, item in ipairs(itemsArray) do
-        local labelType = tostring(item.category)
-        local assetId = tonumber(item.id) or 0
-
-        if assetId ~= 0 then
-            local itemRow = Instance.new("Frame")
-            itemRow.Size = UDim2.new(1, -4, 0, 40)
-            itemRow.BackgroundColor3 = Color3.fromRGB(34, 41, 56)
-            itemRow.Parent = MiniScroll
-            Instance.new("UICorner", itemRow).CornerRadius = UDim.new(0, 5)
-
-            local img = Instance.new("ImageLabel")
-            img.Size = UDim2.new(0, 30, 0, 30)
-            img.Position = UDim2.new(0, 5, 0, 5)
-            img.BackgroundColor3 = Color3.fromRGB(20, 24, 33)
-            img.Image = "rbxthumb://type=Asset&id=" .. tostring(assetId) .. "&w=150&h=150"
-            img.Parent = itemRow
-            Instance.new("UICorner", img).CornerRadius = UDim.new(0, 4)
-
-            local txt = Instance.new("TextLabel")
-            txt.Size = UDim2.new(1, -70, 1, 0)
-            txt.Position = UDim2.new(0, 40, 0, 0)
-            txt.BackgroundTransparency = 1
-            txt.Text = labelType .. ": Loading catalogue details..."
-            txt.TextColor3 = Color3.fromRGB(240, 240, 240)
-            txt.Font = Enum.Font.GothamMedium
-            txt.TextSize = 8
-            txt.TextWrapped = true
-            txt.TextXAlignment = Enum.TextXAlignment.Left
-            txt.Parent = itemRow
-
+for _, child in pairs(MiniScroll:GetChildren()) do
+if child:IsA("Frame") then child:Destroy() end
+end
+if type(itemsArray) ~= "table" or #itemsArray == 0 then return end
+for _, item in ipairs(itemsArray) do
+local labelType = tostring(item.category)
+local assetId = tonumber(item.id) or 0
+if assetId ~= 0 then
+local itemRow = Instance.new("Frame")
+itemRow.Size = UDim2.new(1, -4, 0, 40)
+itemRow.BackgroundColor3 = Color3.fromRGB(34, 41, 56)
+itemRow.Parent = MiniScroll
+Instance.new("UICorner", itemRow).CornerRadius = UDim.new(0, 5)
+local img = Instance.new("ImageLabel")
+img.Size = UDim2.new(0, 30, 0, 30)
+img.Position = UDim2.new(0, 5, 0, 5)
+img.BackgroundColor3 = Color3.fromRGB(20, 24, 33)
+img.Image = "rbxthumb://type=Asset&id=" .. tostring(assetId) .. "&w=150&h=150"
+img.Parent = itemRow
+Instance.new("UICorner", img).CornerRadius = UDim.new(0, 4)
+local txt = Instance.new("TextLabel")
+txt.Size = UDim2.new(1, -70, 1, 0)
+txt.Position = UDim2.new(0, 40, 0, 0)
+txt.BackgroundTransparency = 1
+txt.Text = labelType .. ": Loading catalogue details..."
+txt.TextColor3 = Color3.fromRGB(240, 240, 240)
+txt.Font = Enum.Font.GothamMedium
+txt.TextSize = 8
+txt.TextWrapped = true
+txt.TextXAlignment = Enum.TextXAlignment.Left
+txt.Parent = itemRow
 local cp = Instance.new("TextButton")
 cp.Size = UDim2.new(0, 24, 0, 24)
 cp.Position = UDim2.new(1, -28, 0, 8)
@@ -308,16 +355,34 @@ cardFrame.Size = UDim2.new(1, -4, 0, 50)
 cardFrame.BackgroundColor3 = Color3.fromRGB(30, 37, 51)
 cardFrame.Parent = ScrollFrame
 Instance.new("UICorner", cardFrame).CornerRadius = UDim.new(0, 6)
-local nameLabel = Instance.new("TextLabel")
-nameLabel.Size = UDim2.new(0.45, -5, 1, 0)
-nameLabel.Position = UDim2.new(0, 10, 0, 0)
-nameLabel.BackgroundTransparency = 1
-nameLabel.Text = data.name or "Scanned Config"
-nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-nameLabel.Font = Enum.Font.GothamBold
-nameLabel.TextSize = 11
-nameLabel.TextXAlignment = Enum.TextXAlignment.Left
-nameLabel.Parent = cardFrame
+-- CHANGED: Outfit Name is now an interactive editable TextBox to change names easily
+local nameEditor = Instance.new("TextBox")
+nameEditor.Size = UDim2.new(0.4, 0, 0, 22)
+nameEditor.Position = UDim2.new(0, 10, 0, 4)
+nameEditor.BackgroundTransparency = 1
+nameEditor.Text = data.name or ("Outfit #" .. idx)
+nameEditor.TextColor3 = Color3.fromRGB(255, 255, 255)
+nameEditor.Font = Enum.Font.GothamBold
+nameEditor.TextSize = 11
+nameEditor.TextXAlignment = Enum.TextXAlignment.Left
+nameEditor.ClearTextOnFocus = false
+nameEditor.Parent = cardFrame
+nameEditor.FocusLost:Connect(function()
+if nameEditor.Text ~= "" then
+StorageData.outfits[idx].name = nameEditor.Text
+saveStorage()
+end
+end)
+local codeLabel = Instance.new("TextLabel")
+codeLabel.Size = UDim2.new(0.4, -5, 0, 18)
+codeLabel.Position = UDim2.new(0, 10, 0, 24)
+codeLabel.BackgroundTransparency = 1
+codeLabel.Text = "Code: " .. tostring(data.code)
+codeLabel.TextColor3 = Color3.fromRGB(0, 136, 255)
+codeLabel.Font = Enum.Font.GothamMedium
+codeLabel.TextSize = 10
+codeLabel.TextXAlignment = Enum.TextXAlignment.Left
+codeLabel.Parent = cardFrame
 -- 1. OPEN Button (Smart Toggle sub-panel container state)
 local openBtn = Instance.new("TextButton")
 openBtn.Size = UDim2.new(0, 48, 0, 26)
@@ -339,6 +404,7 @@ MiniOpenPanel.Visible = true
 popMiniPanelItems(data.structureData)
 end
 end)
+
 -- 2. WEAR Button
 local wearBtn = Instance.new("TextButton")
 wearBtn.Size = UDim2.new(0, 48, 0, 26)
@@ -358,7 +424,7 @@ task.wait(0.5)
 wearBtn.Text = "WEAR"
 wearBtn.BackgroundColor3 = Color3.fromRGB(0, 136, 255)
 end)
--- 3. DELETE Button
+-- 3. DELETE Button (CHANGED: Now pops up the central warning menu frame instead of instant delete)
 local delBtn = Instance.new("TextButton")
 delBtn.Size = UDim2.new(0, 48, 0, 26)
 delBtn.Position = UDim2.new(1, -52, 0, 12)
@@ -370,17 +436,29 @@ delBtn.TextSize = 10
 delBtn.Parent = cardFrame
 Instance.new("UICorner", delBtn).CornerRadius = UDim.new(0, 4)
 delBtn.MouseButton1Click:Connect(function()
-table.remove(StorageData.outfits, idx)
-saveStorage()
-if currentActiveOutfitIdx == idx then
-MiniOpenPanel.Visible = false
-currentActiveOutfitIdx = nil
-end
-renderManagerPanel()
+pendingDeleteIdx = idx
+WarnFrame.Visible = true
 end)
 end
 end
-
+-- Warning Pop-Up Control Closures
+YesBtn.MouseButton1Click:Connect(function()
+if pendingDeleteIdx then
+table.remove(StorageData.outfits, pendingDeleteIdx)
+saveStorage()
+if currentActiveOutfitIdx == pendingDeleteIdx then
+MiniOpenPanel.Visible = false
+currentActiveOutfitIdx = nil
+end
+pendingDeleteIdx = nil
+WarnFrame.Visible = false
+renderManagerPanel()
+end
+end)
+NoBtn.MouseButton1Click:Connect(function()
+pendingDeleteIdx = nil
+WarnFrame.Visible = false
+end)
 -- Live Humanoid Character Deep Model Scanner Action Trigger
 ScanBtn.MouseButton1Click:Connect(function()
 local nameText = NameInput.Text
