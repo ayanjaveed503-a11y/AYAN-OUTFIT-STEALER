@@ -1,5 +1,5 @@
 -- Deobfuscated by AYAN
--- AYAN W4S H3R3
+-- AYAN W4S H3R3 & Optimized V3
 
 -- Services
 local Players = game:GetService("Players")
@@ -7,10 +7,9 @@ local CoreGui = game:GetService("CoreGui")
 local MarketplaceService = game:GetService("MarketplaceService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
-local UserInputService = game:GetService("UserInputService")
 
 local LocalPlayer = Players.LocalPlayer
-local FILE_NAME = "AyanSavedOutfitsV2.json"
+local FILE_NAME = "AyanSavedOutfitsV3.json"
 
 -- Remove existing GUI instances
 for _, gui in ipairs(CoreGui:GetChildren()) do
@@ -25,10 +24,9 @@ ScreenGui.Name = "MonKOutfitCopierGui"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = CoreGui
 
--- FIXED: Overall GUI sizes reduced to prevent covering the entire mobile screen
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 340, 0, 380)
-MainFrame.Position = UDim2.new(0.5, -240, 0.5, -190)
+MainFrame.Position = UDim2.new(0.5, -250, 0.5, -190)
 MainFrame.BackgroundColor3 = Color3.fromRGB(22, 26, 35)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -40,9 +38,9 @@ local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 10)
 MainCorner.Parent = MainFrame
 
--- Save Panel (Side Menu) - Made sleeker and more compact
+-- Save Panel (Side Menu)
 local SavePanel = Instance.new("Frame")
-SavePanel.Size = UDim2.new(0, 170, 0, 380)
+SavePanel.Size = UDim2.new(0, 180, 0, 380)
 SavePanel.Position = UDim2.new(1, 8, 0, 0)
 SavePanel.BackgroundColor3 = Color3.fromRGB(28, 33, 46)
 SavePanel.BorderSizePixel = 0
@@ -66,12 +64,11 @@ local PanelTitleCorner = Instance.new("UICorner")
 PanelTitleCorner.CornerRadius = UDim.new(0, 10)
 PanelTitleCorner.Parent = PanelTitle
 
--- FIXED: Re-engineered Save Scroll Area to support continuous infinite list item scroll
 local SaveScroll = Instance.new("ScrollingFrame")
-SaveScroll.Size = UDim2.new(1, -12, 1, -95)
-SaveScroll.Position = UDim2.new(0, 6, 0, 48)
+SaveScroll.Size = UDim2.new(1, -10, 1, -95)
+SaveScroll.Position = UDim2.new(0, 5, 0, 48)
 SaveScroll.BackgroundTransparency = 1
-SaveScroll.ScrollBarThickness = 5
+SaveScroll.ScrollBarThickness = 4
 SaveScroll.ScrollBarImageColor3 = Color3.fromRGB(0, 136, 255)
 SaveScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 SaveScroll.Parent = SavePanel
@@ -260,7 +257,12 @@ local function saveStorage()
     end
 end
 
--- UI Closures
+local function getNetModule()
+    local success, net = pcall(function() return require(ReplicatedStorage.Modules.Core.Net) end)
+    return success and net or nil
+end
+
+-- UI Closures & Minimize Glitch Fix
 CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
@@ -277,7 +279,7 @@ MinimizeBtn.MouseButton1Click:Connect(function()
     else
         MainFrame.Size = UDim2.new(0, 340, 0, 380)
         MinimizeBtn.Text = "-"
-        SavePanel.Visible = true
+        SavePanel.Visible = true  -- FIXED: Panel visibility persistent on maximize
     end
 end)
 
@@ -315,29 +317,37 @@ end)
 -- Helper Functions
 local function createItemCard(category, assetId)
 local itemFrame = Instance.new("Frame")
-itemFrame.Size = UDim2.new(1, -8, 0, 46)
+itemFrame.Size = UDim2.new(1, -8, 0, 48)
 itemFrame.BackgroundColor3 = Color3.fromRGB(35, 42, 55)
 itemFrame.Parent = ScrollFrame
 local frameCorner = Instance.new("UICorner")
 frameCorner.CornerRadius = UDim.new(0, 6)
 frameCorner.Parent = itemFrame
+-- FIXED: Live Asset Roblox Photo Box preview element
+local imgPreview = Instance.new("ImageLabel")
+imgPreview.Size = UDim2.new(0, 38, 0, 38)
+imgPreview.Position = UDim2.new(0, 5, 0, 5)
+imgPreview.BackgroundColor3 = Color3.fromRGB(25, 30, 40)
+imgPreview.Image = "rbxthumb://type=Asset&id=" .. tostring(assetId) .. "&w=150&h=150"
+imgPreview.Parent = itemFrame
+local imgCorner = Instance.new("UICorner")
+imgCorner.CornerRadius = UDim.new(0, 4)
+imgCorner.Parent = imgPreview
 local label = Instance.new("TextLabel")
-label.Size = UDim2.new(0.65, 0, 1, 0)
-label.Position = UDim2.new(0, 10, 0, 0)
+label.Size = UDim2.new(0.52, 0, 1, 0)
+label.Position = UDim2.new(0, 48, 0, 0)
 label.BackgroundTransparency = 1
 label.RichText = true
 local prefixText = "" .. category .. " [" .. tostring(assetId) .. "]"
-label.Text = prefixText .. "Fetching details..."
+label.Text = prefixText .. "Loading..."
 label.TextColor3 = Color3.fromRGB(255, 255, 255)
 label.TextXAlignment = Enum.TextXAlignment.Left
 label.Font = Enum.Font.GothamMedium
-label.TextSize = 10
+label.TextSize = 9
 label.TextTruncate = Enum.TextTruncate.AtEnd
 label.Parent = itemFrame
 task.spawn(function()
-local success, info = pcall(function()
-return MarketplaceService:GetProductInfo(assetId)
-end)
+local success, info = pcall(function() return MarketplaceService:GetProductInfo(assetId) end)
 if success and info then
 label.Text = prefixText .. "" .. info.Name .. ""
 else
@@ -345,13 +355,13 @@ label.Text = prefixText .. "Unknown Item"
 end
 end)
 local copyBtn = Instance.new("TextButton")
-copyBtn.Size = UDim2.new(0, 75, 0, 28)
-copyBtn.Position = UDim2.new(1, -82, 0, 9)
+copyBtn.Size = UDim2.new(0, 62, 0, 26)
+copyBtn.Position = UDim2.new(1, -68, 0, 11)
 copyBtn.BackgroundColor3 = Color3.fromRGB(0, 110, 220)
 copyBtn.Text = "COPY"
 copyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 copyBtn.Font = Enum.Font.GothamBold
-copyBtn.TextSize = 11
+copyBtn.TextSize = 10
 copyBtn.Parent = itemFrame
 local btnCorner = Instance.new("UICorner")
 btnCorner.CornerRadius = UDim.new(0, 5)
@@ -367,24 +377,23 @@ copyBtn.BackgroundColor3 = Color3.fromRGB(0, 110, 220)
 end
 end)
 end
-local renderSavedPanel -- Pre-declare
 
+local renderSavedPanel -- Pre-declare
 renderSavedPanel = function()
 for _, child in pairs(SaveScroll:GetChildren()) do
 if child:IsA("Frame") then child:Destroy() end
 end
 for idx, data in ipairs(LoadedData.outfits) do
 local savedFrame = Instance.new("Frame")
-savedFrame.Size = UDim2.new(1, -4, 0, 36)
+savedFrame.Size = UDim2.new(1, -4, 0, 52)
 savedFrame.BackgroundColor3 = Color3.fromRGB(45, 52, 68)
 savedFrame.Parent = SaveScroll
 local sfCorner = Instance.new("UICorner")
 sfCorner.CornerRadius = UDim.new(0, 5)
 sfCorner.Parent = savedFrame
--- Name Text Box (Acts as text button + lets user edit the name inline)
 local nameEditor = Instance.new("TextBox")
-nameEditor.Size = UDim2.new(0.68, 0, 1, 0)
-nameEditor.Position = UDim2.new(0, 6, 0, 0)
+nameEditor.Size = UDim2.new(1, -10, 0, 20)
+nameEditor.Position = UDim2.new(0, 6, 0, 2)
 nameEditor.BackgroundTransparency = 1
 nameEditor.Text = data.name or ("Outfit #" .. idx)
 nameEditor.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -393,21 +402,26 @@ nameEditor.TextSize = 10
 nameEditor.TextXAlignment = Enum.TextXAlignment.Left
 nameEditor.ClearTextOnFocus = false
 nameEditor.Parent = savedFrame
--- FIXED: Pressing Enter on the text box triggers the inline rename save sequence
-nameEditor.FocusLost:Connect(function(enterPressed)
+nameEditor.FocusLost:Connect(function()
 if nameEditor.Text ~= "" then
 LoadedData.outfits[idx].name = nameEditor.Text
 saveStorage()
 end
 end)
--- Clicking inside the name box and tapping can let you see the reveal list too
-local clickDetect = Instance.new("TextButton")
-clickDetect.Size = UDim2.new(0.8, 0, 1, 0)
-clickDetect.BackgroundTransparency = 1
-clickDetect.Text = ""
-clickDetect.ZIndex = 0
-clickDetect.Parent = savedFrame
-clickDetect.MouseButton1Click:Connect(function()
+-- FIXED: Green "OPEN" Button Added
+local openBtn = Instance.new("TextButton")
+openBtn.Size = UDim2.new(0, 42, 0, 20)
+openBtn.Position = UDim2.new(0, 6, 0, 26)
+openBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
+openBtn.Text = "OPEN"
+openBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+openBtn.Font = Enum.Font.GothamBold
+openBtn.TextSize = 9
+openBtn.Parent = savedFrame
+local openCorner = Instance.new("UICorner")
+openCorner.CornerRadius = UDim.new(0, 4)
+openCorner.Parent = openBtn
+openBtn.MouseButton1Click:Connect(function()
 for _, child in pairs(ScrollFrame:GetChildren()) do
 if child:IsA("Frame") then child:Destroy() end
 end
@@ -415,9 +429,62 @@ for _, item in ipairs(data.items) do
 createItemCard(item.category, item.id)
 end
 end)
+-- FIXED: Orange "WEAR" Automated Steal Button Added
+local wearBtn = Instance.new("TextButton")
+wearBtn.Size = UDim2.new(0, 42, 0, 20)
+wearBtn.Position = UDim2.new(0, 52, 0, 26)
+wearBtn.BackgroundColor3 = Color3.fromRGB(230, 126, 34)
+wearBtn.Text = "WEAR"
+wearBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+wearBtn.Font = Enum.Font.GothamBold
+wearBtn.TextSize = 9
+wearBtn.Parent = savedFrame
+local wearCorner = Instance.new("UICorner")
+wearCorner.CornerRadius = UDim.new(0, 4)
+wearCorner.Parent = wearBtn
+wearBtn.MouseButton1Click:Connect(function()
+local Net = getNetModule()
+if not Net then return end
+wearBtn.Text = "WAIT.."
+pcall(function()
+Net.send("wear_outfit_from_desc", {
+["accessories"] = {},
+["properties"] = {
+["Shirt"] = 0, ["Pants"] = 0, ["GraphicTShirt"] = 0, ["Face"] = 0,
+["Head"] = 0, ["Torso"] = 0, ["LeftArm"] = 0, ["RightArm"] = 0,
+["LeftLeg"] = 0, ["RightLeg"] = 0, ["WalkAnimation"] = 0, ["RunAnimation"] = 0,
+["JumpAnimation"] = 0, ["FallAnimation"] = 0, ["ClimbAnimation"] = 0,
+["IdleAnimation"] = 0, ["SwimAnimation"] = 0, ["HeightScale"] = 1,
+["HeadScale"] = 1, ["WidthScale"] = 1, ["DepthScale"] = 1,
+["ProportionScale"] = 0, ["BodyTypeScale"] = 0
+}
+})
+task.wait(0.2)
+end)
+
+task.spawn(function()
+for _, item in ipairs(data.items) do
+local rawType = item.category
+if string.match(rawType, "Anim:") then
+rawType = string.gsub(rawType, "Anim: ", "") .. "Animation"
+elseif string.match(rawType, "Body:") then
+rawType = string.gsub(rawType, "Body: ", "")
+elseif not string.match(rawType, "Accessory") and rawType ~= "Shirt" and rawType ~= "Pants" and rawType ~= "Face" then
+rawType = rawType .. "Accessory"
+elseif rawType == "T-Shirt" then
+rawType = "TShirt"
+end
+pcall(function()
+Net.get("code", tonumber(item.id), tostring(rawType))
+end)
+task.wait(0.3)
+end
+wearBtn.Text = "WEAR"
+end)
+end)
 local delBtn = Instance.new("TextButton")
-delBtn.Size = UDim2.new(0, 38, 0, 24)
-delBtn.Position = UDim2.new(1, -42, 0, 6)
+delBtn.Size = UDim2.new(0, 34, 0, 20)
+delBtn.Position = UDim2.new(1, -38, 0, 26)
 delBtn.BackgroundColor3 = Color3.fromRGB(231, 76, 60)
 delBtn.Text = "DEL"
 delBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -434,10 +501,8 @@ renderSavedPanel()
 end)
 end
 end
-
 ActionPanelSaveBtn.MouseButton1Click:Connect(function()
 if not currentScannedOutfit or #currentScannedOutfit.items == 0 then return end
--- Clone to prevent overriding errors
 local outfitToSave = {
 name = currentScannedOutfit.name,
 items = {}
@@ -452,38 +517,6 @@ ActionPanelSaveBtn.Text = "SAVED! ✔"
 task.wait(1)
 ActionPanelSaveBtn.Text = "SAVE OUTFIT"
 end)
-local function getNetModule()
-local success, net = pcall(function() return require(ReplicatedStorage.Modules.Core.Net) end)
-return success and net or nil
-end
-local function getCharacterByName(nameQuery)
-local cleanName = string.match(nameQuery, "^%s*(.-)%s*$"):lower()
-for _, plr in ipairs(Players:GetPlayers()) do
-if string.sub(plr.Name:lower(), 1, #cleanName) == cleanName or string.sub(plr.DisplayName:lower(), 1, #cleanName) == cleanName then
-return plr.Character
-end
-end
-return nil
-end
-local function isCelestialSyndicate(character, searchName)
-local tag = "Super"
-if searchName and string.find(searchName:lower(), tag) then return true end
-if not character then return false end
-local plr = Players:GetPlayerFromCharacter(character)
-if plr and (string.find(plr.Name:lower(), tag) or string.find(plr.DisplayName:lower(), tag)) then return true end
-for _, attr in pairs(character:GetAttributes()) do
-if type(attr) == "string" and string.find(attr:lower(), tag) then return true end
-end
-for _, desc in ipairs(character:GetDescendants()) do
-if desc:IsA("StringValue") and string.find(desc.Value:lower(), tag) then
-return true
-elseif desc:IsA("TextLabel") or desc:IsA("TextButton") or desc:IsA("TextBox") then
-local text = desc.Text:lower()
-if string.find(text, tag) or string.find(text:gsub("<[^>]+>", ""), tag) then return true end
-end
-end
-return false
-end
 -- Button Logics
 RevealBtn.MouseButton1Click:Connect(function()
 DropdownList.Visible = false
@@ -493,7 +526,17 @@ if child:IsA("Frame") then child:Destroy() end
 end
 local nameQuery = InputBox.Text:lower()
 if nameQuery == "" then return end
-local targetChar = getCharacterByName(nameQuery)
+local targetChar = Players:FindFirstChild(nameQuery) and Players[nameQuery].Character or workspace:FindFirstChild(nameQuery)
+if not targetChar then
+-- Loose match fallback
+for _, plr in ipairs(Players:GetPlayers()) do
+if string.sub(plr.Name:lower(), 1, #nameQuery) == nameQuery or string.sub(plr.DisplayName:lower(), 1, #nameQuery) == nameQuery then
+targetChar = plr.Character
+break
+end
+end
+end
+
 if isCelestialSyndicate(targetChar, nameQuery) then
 RevealBtn.Text = "ZERO MERCY MEMBER✌🏻"
 RevealBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
@@ -529,20 +572,15 @@ local anims = {
 {"Climb", desc.ClimbAnimation}, {"Swim", desc.SwimAnimation}
 }
 for _, anim in ipairs(anims) do
-if anim[2] and anim[2] ~= 0 then
-parseItem("Anim: " .. anim[1], anim[2])
+if anim[2] and anim[2] ~= 0 then parseItem("Anim: " .. anim[1], anim[2]) end
 end
-end
-
 local bodyParts = {
 {"Head", desc.Head}, {"Torso", desc.Torso},
 {"LeftArm", desc.LeftArm}, {"RightArm", desc.RightArm},
 {"LeftLeg", desc.LeftLeg}, {"RightLeg", desc.RightLeg}
 }
 for _, body in ipairs(bodyParts) do
-if body[2] and body[2] ~= 0 then
-parseItem("Body: " .. body[1], body[2])
-end
+if body[2] and body[2] ~= 0 then parseItem("Body: " .. body[1], body[2]) end
 end
 RevealBtn.Text = "REVEAL IDs"
 end
@@ -565,7 +603,7 @@ task.spawn(function()
 isStealing = true
 StealBtn.Text = "CHECKING TARGET..."
 StealBtn.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
-local targetChar = getCharacterByName(nameQuery)
+local targetChar = Players:FindFirstChild(nameQuery) and Players[nameQuery].Character or workspace:FindFirstChild(nameQuery)
 if isCelestialSyndicate(targetChar, nameQuery) then
 StealBtn.Text = "ZERO MERCY MEMBER✌🏻"
 StealBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
@@ -589,7 +627,6 @@ if not Net then
 StealBtn.Text = "MODULE ERROR"
 task.wait(2)
 StealBtn.Text = "STEAL OUTFIT"
-StealBtn.BackgroundColor3 = Color3.fromRGB(255, 140, 0)
 isStealing = false
 return
 end
