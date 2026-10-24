@@ -1,58 +1,55 @@
--- Life Together Custom Code Alphanumeric Analyzer & Storage
--- Delta Executor Optimized GUI | Fixed Ultimate Wear & Details View Engine
+-- Life Together Premium Tabbed Outfit Manager & Analyzer
+-- Optimized for Delta Executor | Core Framework Stable
 
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
+local MarketplaceService = game:GetService("MarketplaceService")
 
 local LocalPlayer = Players.LocalPlayer
-local FILE_NAME = "LifeTogether_AlphanumericOutfits.json"
+local FILE_NAME = "LifeTogether_PremiumTabsData.json"
 
--- Existing GUI Cleanup
+-- Cleanup old instances
 for _, gui in ipairs(CoreGui:GetChildren()) do
-    if gui.Name == "LT_AlphaOutfitGui" then
+    if gui.Name == "LT_PremiumOutfitGui" then
         gui:Destroy()
     end
 end
 
--- GUI Interface Design
+-- GUI Root Structure
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "LT_AlphaOutfitGui"
+ScreenGui.Name = "LT_PremiumOutfitGui"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = CoreGui
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 380, 0, 440)
-MainFrame.Position = UDim2.new(0.5, -190, 0.5, -220)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 24, 33)
+MainFrame.Size = UDim2.new(0, 520, 0, 460)
+MainFrame.Position = UDim2.new(0.5, -260, 0.5, -230)
+MainFrame.BackgroundColor3 = Color3.fromRGB(18, 22, 30)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 10)
-MainCorner.Parent = MainFrame
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
 
+-- Top Bar Component
 local TopBar = Instance.new("Frame")
 TopBar.Size = UDim2.new(1, 0, 0, 45)
-TopBar.BackgroundColor3 = Color3.fromRGB(28, 34, 46)
+TopBar.BackgroundColor3 = Color3.fromRGB(26, 32, 44)
 TopBar.BorderSizePixel = 0
 TopBar.Parent = MainFrame
-
-local TopCorner = Instance.new("UICorner")
-TopCorner.CornerRadius = UDim.new(0, 10)
-TopCorner.Parent = TopBar
+Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 12)
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -50, 1, 0)
+Title.Size = UDim2.new(1, -60, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "OUTFIT GAME-CODE ANALYZER 📱"
+Title.Text = "LIFE TOGETHER SUPREME OUTFIT MANAGER v4 👑"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 13
+Title.TextSize = 12
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TopBar
 
@@ -65,292 +62,362 @@ CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.TextSize = 12
 CloseBtn.Parent = TopBar
+Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 6)
+CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
 
-local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(0, 6)
-CloseCorner.Parent = CloseBtn
+-- Left Side: Tabs Navigation Panel
+local TabBar = Instance.new("Frame")
+TabBar.Size = UDim2.new(0, 130, 1, -55)
+TabBar.Position = UDim2.new(0, 10, 0, 50)
+TabBar.BackgroundTransparency = 1
+TabBar.Parent = MainFrame
 
-CloseBtn.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
-end)
+local TabListLayout = Instance.new("UIListLayout")
+TabListLayout.Padding = UDim.new(0, 5)
+TabListLayout.Parent = TabBar
 
--- Inputs
+-- Right Side: Dynamic Content Frame container
+local ContentArea = Instance.new("Frame")
+ContentArea.Size = UDim2.new(0, 210, 1, -100)
+ContentArea.Position = UDim2.new(0, 145, 0, 50)
+ContentArea.BackgroundColor3 = Color3.fromRGB(24, 29, 41)
+ContentArea.BorderSizePixel = 0
+ContentArea.Parent = MainFrame
+Instance.new("UICorner", ContentArea).CornerRadius = UDim.new(0, 8)
+
+-- Global Outfit Configuration Fields (Top Center Left)
 local NameInput = Instance.new("TextBox")
-NameInput.Size = UDim2.new(0.9, 0, 0, 34)
-NameInput.Position = UDim2.new(0.05, 0, 0, 55)
-NameInput.BackgroundColor3 = Color3.fromRGB(32, 39, 53)
-NameInput.PlaceholderText = "Enter Outfit Custom Name..."
+NameInput.Size = UDim2.new(0, 210, 0, 32)
+NameInput.Position = UDim2.new(0, 145, 1, -42)
+NameInput.BackgroundColor3 = Color3.fromRGB(30, 37, 52)
+NameInput.PlaceholderText = "Enter Outfit Configuration Name..."
 NameInput.Text = ""
 NameInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 NameInput.Font = Enum.Font.Gotham
 NameInput.TextSize = 11
 NameInput.Parent = MainFrame
+Instance.new("UICorner", NameInput).CornerRadius = UDim.new(0, 6)
+local np = Instance.new("UIPadding", NameInput) np.PaddingLeft = UDim.new(0, 8)
 
-local NamePadding = Instance.new("UIPadding")
-NamePadding.PaddingLeft = UDim.new(0, 10)
-NamePadding.Parent = NameInput
+-- Far Right Panel: Saved Config List & Active Visual Details
+local RightPanel = Instance.new("Frame")
+RightPanel.Size = UDim2.new(0, 150, 1, -55)
+RightPanel.Position = UDim2.new(1, -160, 0, 50)
+RightPanel.BackgroundColor3 = Color3.fromRGB(23, 28, 38)
+RightPanel.BorderSizePixel = 0
+RightPanel.Parent = MainFrame
+Instance.new("UICorner", RightPanel).CornerRadius = UDim.new(0, 8)
 
-local NameCorner = Instance.new("UICorner")
-NameCorner.CornerRadius = UDim.new(0, 6)
-NameCorner.Parent = NameInput
+local SavedScroll = Instance.new("ScrollingFrame")
+SavedScroll.Size = UDim2.new(1, -10, 0, 160)
+SavedScroll.Position = UDim2.new(0, 5, 0, 5)
+SavedScroll.BackgroundTransparency = 1
+SavedScroll.ScrollBarThickness = 3
+SavedScroll.ScrollBarImageColor3 = Color3.fromRGB(0, 136, 255)
+SavedScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+SavedScroll.Parent = RightPanel
 
-local CodeInput = Instance.new("TextBox")
-CodeInput.Size = UDim2.new(0.9, 0, 0, 34)
-CodeInput.Position = UDim2.new(0.05, 0, 0, 95)
-CodeInput.BackgroundColor3 = Color3.fromRGB(32, 39, 53)
-CodeInput.PlaceholderText = "Paste Game Outfit Code (e.g., E6VE7RB)..."
-CodeInput.Text = ""
-CodeInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-CodeInput.Font = Enum.Font.GothamBold
-CodeInput.TextSize = 12
-CodeInput.Parent = MainFrame
-
-local CodePadding = Instance.new("UIPadding")
-CodePadding.PaddingLeft = UDim.new(0, 10)
-CodePadding.Parent = CodeInput
-
-local CodeCorner = Instance.new("UICorner")
-CodeCorner.CornerRadius = UDim.new(0, 6)
-CodeCorner.Parent = CodeInput
-
--- Analyze & Save Button
-local SaveBtn = Instance.new("TextButton")
-SaveBtn.Size = UDim2.new(0.9, 0, 0, 36)
-SaveBtn.Position = UDim2.new(0.05, 0, 0, 135)
-SaveBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
-SaveBtn.Text = "ANALYSE GAME CODE & SAVE"
-SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-SaveBtn.Font = Enum.Font.GothamBold
-SaveBtn.TextSize = 11
-SaveBtn.Parent = MainFrame
-
-local SaveBtnCorner = Instance.new("UICorner")
-SaveBtnCorner.CornerRadius = UDim.new(0, 6)
-SaveBtnCorner.Parent = SaveBtn
-
--- Live Details Visualizer Panel
-local InfoPanel = Instance.new("Frame")
-InfoPanel.Size = UDim2.new(0.9, 0, 0, 65)
-InfoPanel.Position = UDim2.new(0.05, 0, 0, 180)
-InfoPanel.BackgroundColor3 = Color3.fromRGB(25, 30, 43)
-InfoPanel.BorderSizePixel = 0
-InfoPanel.Parent = MainFrame
-
-local InfoCorner = Instance.new("UICorner")
-InfoCorner.CornerRadius = UDim.new(0, 6)
-InfoCorner.Parent = InfoPanel
-
-local InfoText = Instance.new("TextLabel")
-InfoText.Size = UDim2.new(1, -20, 1, -10)
-InfoText.Position = UDim2.new(0, 10, 0, 5)
-InfoText.BackgroundTransparency = 1
-InfoText.Text = "Click [OPEN] on any outfit to view individual Shirt, Pants and Accessory IDs instantly."
-InfoText.TextColor3 = Color3.fromRGB(170, 185, 210)
-InfoText.Font = Enum.Font.GothamMedium
-InfoText.TextSize = 10
-InfoText.TextWrapped = true
-InfoText.TextXAlignment = Enum.TextXAlignment.Left
-InfoText.TextYAlignment = Enum.TextYAlignment.Top
-InfoText.Parent = InfoPanel
-
--- Scroll Content List
-local ScrollFrame = Instance.new("ScrollingFrame")
-ScrollFrame.Size = UDim2.new(0.9, 0, 0, 175)
-ScrollFrame.Position = UDim2.new(0.05, 0, 0, 255)
-ScrollFrame.BackgroundTransparency = 1
-ScrollFrame.ScrollBarThickness = 4
-ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 136, 255)
-ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-ScrollFrame.Parent = MainFrame
-
-local ListLayout = Instance.new("UIListLayout")
-ListLayout.Padding = UDim.new(0, 6)
-ListLayout.Parent = ScrollFrame
-
-ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 10)
+local SavedListLayout = Instance.new("UIListLayout")
+SavedListLayout.Padding = UDim.new(0, 4)
+SavedListLayout.Parent = SavedScroll
+SavedListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    SavedScroll.CanvasSize = UDim2.new(0, 0, 0, SavedListLayout.AbsoluteContentSize.Y + 5)
 end)
 
--- Storage Engine
+-- Far Right Bottom View: Active Asset Display (Image Previews + Names List)
+local VisualDisplayFrame = Instance.new("ScrollingFrame")
+VisualDisplayFrame.Size = UDim2.new(1, -10, 1, -175)
+VisualDisplayFrame.Position = UDim2.new(0, 5, 0, 170)
+VisualDisplayFrame.BackgroundColor3 = Color3.fromRGB(15, 18, 25)
+VisualDisplayFrame.BorderSizePixel = 0
+VisualDisplayFrame.ScrollBarThickness = 3
+VisualDisplayFrame.ScrollBarImageColor3 = Color3.fromRGB(46, 204, 113)
+VisualDisplayFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+VisualDisplayFrame.Parent = RightPanel
+Instance.new("UICorner", VisualDisplayFrame).CornerRadius = UDim.new(0, 6)
+
+local VisualListLayout = Instance.new("UIListLayout")
+VisualListLayout.Padding = UDim.new(0, 5)
+VisualListLayout.Parent = VisualDisplayFrame
+VisualListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    VisualDisplayFrame.CanvasSize = UDim2.new(0, 0, 0, VisualListLayout.AbsoluteContentSize.Y + 5)
+end)
+
+-- Main Config Database Engine & Storage
 local StorageData = { outfits = {} }
+local activeInputs = {}
 
 local function loadStorage()
     if readfile and isfile and isfile(FILE_NAME) then
-        pcall(function()
-            StorageData = HttpService:JSONDecode(readfile(FILE_NAME))
-        end)
+        pcall(function() StorageData = HttpService:JSONDecode(readfile(FILE_NAME)) end)
     end
 end
 
 local function saveStorage()
-    if writefile then
-        writefile(FILE_NAME, HttpService:JSONEncode(StorageData))
-    end
+    if writefile then writefile(FILE_NAME, HttpService:JSONEncode(StorageData)) end
 end
 
 local function getNetModule()
-    local success, net = pcall(function() 
-        return require(ReplicatedStorage.Modules.Core.Net) 
-    end)
+    local success, net = pcall(function() return require(ReplicatedStorage.Modules.Core.Net) end)
     return success and net or nil
 end
 
--- Network Code Fetcher Engine
-local function fetchAndAnalyzeGameCode(gameCode)
-    local Net = getNetModule()
-    if not Net then return nil end
+-- Helper: Create Input Container Sub-Boxes for Tab Contexts
+local function createTabField(parentFrame, yPos, labelTitle, storageKey)
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, -16, 0, 40)
+    container.Position = UDim2.new(0, 8, 0, yPos)
+    container.BackgroundTransparency = 1
+    container.Parent = parentFrame
 
-    local outfitData = nil
-    pcall(function()
-        outfitData = Net.get("GetOutfit", gameCode) or Net.get("outfits", "get", gameCode)
-    end)
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(0.4, 0, 1, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = labelTitle
+    lbl.TextColor3 = Color3.fromRGB(180, 195, 215)
+    lbl.Font = Enum.Font.GothamMedium
+    lbl.TextSize = 10
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Parent = container
 
-    if not outfitData then
-        pcall(function()
-            outfitData = ReplicatedStorage.Remotes.GetOutfit:InvokeServer(gameCode)
-        end)
-    end
+    local box = Instance.new("TextBox")
+    box.Size = UDim2.new(0.6, 0, 0, 28)
+    box.Position = UDim2.new(0.4, 0, 0, 6)
+    box.BackgroundColor3 = Color3.fromRGB(33, 40, 55)
+    box.PlaceholderText = "Paste ID..."
+    box.Text = ""
+    box.TextColor3 = Color3.fromRGB(255, 255, 255)
+    box.Font = Enum.Font.GothamBold
+    box.TextSize = 11
+    box.Parent = container
+    Instance.new("UICorner", box).CornerRadius = UDim.new(0, 5)
+    local bp = Instance.new("UIPadding", box) bp.PaddingLeft = UDim.new(0, 6)
 
-    return outfitData
+    activeInputs[storageKey] = box
 end
 
--- Life Together Ultimate Native Event Wear Framework (Fixed Engine)
-local function applyGameOutfitStructure(outfitStructure)
+-- Tab Windows Mapping Framework
+local TabFrames = {}
+local function buildTabFrames()
+    local categories = {
+        {"Clothing", {"ShirtID", "PantsID", "GraphicTShirtID"}},
+        {"Head & Face", {"HairID", "HatID", "GlassesID", "FaceMaskID"}},
+        {"Accessories", {"NeckID", "ShoulderID", "BackPackID", "WaistID"}},
+        {"Style", {"FaceExpressionID", "WalkAnimID", "RunAnimID", "IdleAnimID"}}
+    }
+
+    for _, catData in ipairs(categories) do
+        local catName = catData[1]
+        local keys = catData[2]
+
+        local tFrame = Instance.new("Frame")
+        tFrame.Size = UDim2.new(1, 0, 1, 0)
+        tFrame.BackgroundTransparency = 1
+        tFrame.Visible = false
+        tFrame.Parent = ContentArea
+        TabFrames[catName] = tFrame
+
+        local y = 8
+        for _, key in ipairs(keys) do
+            createTabField(tFrame, y, key:gsub("ID", ""), key)
+            y = y + 42
+        end
+
+        -- Tab Toggle Buttons Build
+        local tBtn = Instance.new("TextButton")
+        tBtn.Size = UDim2.new(1, 0, 0, 34)
+        tBtn.BackgroundColor3 = Color3.fromRGB(28, 34, 46)
+        tBtn.Text = "  " .. catName:upper()
+        tBtn.TextColor3 = Color3.fromRGB(200, 210, 230)
+        tBtn.Font = Enum.Font.GothamBold
+        tBtn.TextSize = 10
+        tBtn.TextXAlignment = Enum.TextXAlignment.Left
+        tBtn.Parent = TabBar
+        Instance.new("UICorner", tBtn).CornerRadius = UDim.new(0, 6)
+
+        tBtn.MouseButton1Click:Connect(function()
+            for _, f in pairs(TabFrames) do f.Visible = false end
+            for _, b in ipairs(TabBar:GetChildren()) do 
+                if b:IsA("TextButton") then b.BackgroundColor3 = Color3.fromRGB(28, 34, 46) end 
+            end
+            tFrame.Visible = true
+            tBtn.BackgroundColor3 = Color3.fromRGB(0, 136, 255)
+        end)
+    end
+    -- Default selection state
+    if TabFrames["Clothing"] then TabFrames["Clothing"].Visible = true end
+    local initialBtn = TabBar:FindFirstChildOfClass("TextButton")
+    if initialBtn then initialBtn.BackgroundColor3 = Color3.fromRGB(0, 136, 255) end
+end
+
+-- Life Together Core Execution Framework Remotes Mapping (Stable Line-by-Line Engine)
+local function applyComponentOutfit(dataBlock)
     local Net = getNetModule()
     if not Net then return end
 
-    -- Step 1: Global Clear Avatar State
+    -- Step 1: Wipe Character Avatar Layout Clean
     pcall(function()
         Net.send("ClearOutfit")
         Net.send("wear_outfit_from_desc", { ["accessories"] = {}, ["properties"] = { ["Shirt"] = 0, ["Pants"] = 0 } })
     end)
-    task.wait(0.4)
+    task.wait(0.5)
 
-    -- Step 2: High Security Structural Deployment
-    if type(outfitStructure) == "table" then
-        -- Native Framework updates mapping sequence
-        if outfitStructure.Shirt and tonumber(outfitStructure.Shirt) ~= 0 then
-            pcall(function() Net.send("UpdateOutfit", "Shirt", tonumber(outfitStructure.Shirt)) end)
-            pcall(function() Net.get("code", tonumber(outfitStructure.Shirt), "Shirt") end)
-            task.wait(0.2)
-        end
-        
-        if outfitStructure.Pants and tonumber(outfitStructure.Pants) ~= 0 then
-            pcall(function() Net.send("UpdateOutfit", "Pants", tonumber(outfitStructure.Pants)) end)
-            pcall(function() Net.get("code", tonumber(outfitStructure.Pants), "Pants") end)
-            task.wait(0.2)
-        end
-
-        -- Accessories Parsing Loop block
-        local list = outfitStructure.accessories or outfitStructure.Items
-        if list and type(list) == "table" then
-            for _, accId in ipairs(list) do
-                if tonumber(accId) ~= 0 then
-                    pcall(function() Net.send("UpdateOutfit", "Accessory", tonumber(accId)) end)
-                    pcall(function() Net.get("code", tonumber(accId), "Accessory") end)
-                    task.wait(0.2)
-                end
-            end
-        end
-        
-        -- Game native synchronization refresh call
-        pcall(function() Net.send("RefreshCharacter") end)
-    end
+-- Step 2: Line-by-Line Order Injection System
+local function deploy(id, itemType)
+if id and tonumber(id) and tonumber(id) ~= 0 then
+pcall(function() Net.send("UpdateOutfit", itemType, tonumber(id)) end)
+pcall(function() Net.get("code", tonumber(id), itemType) end)
+task.wait(0.25)
+end
+end
+deploy(dataBlock.ShirtID, "Shirt")
+deploy(dataBlock.PantsID, "Pants")
+deploy(dataBlock.GraphicTShirtID, "TShirt")
+deploy(dataBlock.HairID, "Accessory")
+deploy(dataBlock.HatID, "Accessory")
+deploy(dataBlock.GlassesID, "Accessory")
+deploy(dataBlock.FaceMaskID, "Accessory")
+deploy(dataBlock.NeckID, "Accessory")
+deploy(dataBlock.ShoulderID, "Accessory")
+deploy(dataBlock.BackPackID, "Accessory")
+deploy(dataBlock.WaistID, "Accessory")
+deploy(dataBlock.FaceExpressionID, "Face")
+deploy(dataBlock.WalkAnimID, "WalkAnimation")
+deploy(dataBlock.RunAnimID, "RunAnimation")
+deploy(dataBlock.IdleAnimID, "IdleAnimation")
+-- Step 3: Global Force Server Core Sync
+pcall(function() Net.send("RefreshCharacter") end)
+end
+-- Open Panel Dynamic Matrix Builder (Compiles Images, Names & Copy Controls)
+local function displayVisualComponents(dataBlock)
+for _, child in pairs(VisualDisplayFrame:GetChildren()) do
+if child:IsA("Frame") then child:Destroy() end
+end
+local assetOrderList = {
+{"Shirt", dataBlock.ShirtID}, {"Pants", dataBlock.PantsID}, {"T-Shirt", dataBlock.GraphicTShirtID},
+{"Hair", dataBlock.HairID}, {"Hat", dataBlock.HatID}, {"Glasses", dataBlock.GlassesID},
+{"Mask", dataBlock.FaceMaskID}, {"Neck", dataBlock.NeckID}, {"Shoulder", dataBlock.ShoulderID},
+{"BackPack", dataBlock.BackPackID}, {"Waist", dataBlock.WaistID}, {"Face", dataBlock.FaceExpressionID},
+{"Walk", dataBlock.WalkAnimID}, {"Run", dataBlock.RunAnimID}, {"Idle", dataBlock.IdleAnimID}
+}
+for _, asset in ipairs(assetOrderList) do
+local typeName = asset[1]
+local assetId = tonumber(asset[2]) or 0
+if assetId ~= 0 then
+local elementFrame = Instance.new("Frame")
+elementFrame.Size = UDim2.new(1, -4, 0, 42)
+elementFrame.BackgroundColor3 = Color3.fromRGB(26, 32, 45)
+elementFrame.Parent = VisualDisplayFrame
+Instance.new("UICorner", elementFrame).CornerRadius = UDim.new(0, 5)
+-- Asset Image Thumbnail Rendering Layer
+local img = Instance.new("ImageLabel")
+img.Size = UDim2.new(0, 32, 0, 32)
+img.Position = UDim2.new(0, 5, 0, 5)
+img.BackgroundColor3 = Color3.fromRGB(15, 18, 25)
+img.Image = "rbxthumb://type=Asset&id=" .. tostring(assetId) .. "&w=150&h=150"
+img.Parent = elementFrame
+Instance.new("UICorner", img).CornerRadius = UDim.new(0, 4)
+-- Product Full Name Dynamic Loader Text Labels
+local nameLbl = Instance.new("TextLabel")
+nameLbl.Size = UDim2.new(1, -75, 1, 0)
+nameLbl.Position = UDim2.new(0, 42, 0, 0)
+nameLbl.BackgroundTransparency = 1
+nameLbl.Text = typeName .. ": Fetching..."
+nameLbl.TextColor3 = Color3.fromRGB(240, 240, 240)
+nameLbl.Font = Enum.Font.GothamMedium
+nameLbl.TextSize = 8
+nameLbl.TextWrapped = true
+nameLbl.TextXAlignment = Enum.TextXAlignment.Left
+nameLbl.Parent = elementFrame
+-- Dedicated COPY ID Action Module Implementation
+local cpBtn = Instance.new("TextButton")
+cpBtn.Size = UDim2.new(0, 26, 0, 26)
+cpBtn.Position = UDim2.new(1, -30, 0, 8)
+cpBtn.BackgroundColor3 = Color3.fromRGB(0, 136, 255)
+cpBtn.Text = "📋"
+cpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+cpBtn.Font = Enum.Font.GothamBold
+cpBtn.TextSize = 10
+cpBtn.Parent = elementFrame
+Instance.new("UICorner", cpBtn).CornerRadius = UDim.new(0, 4)
+cpBtn.MouseButton1Click:Connect(function()
+if setclipboard then
+setclipboard(tostring(assetId))
+cpBtn.Text = "✓"
+cpBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
+task.wait(1)
+cpBtn.Text = "📋"
+cpBtn.BackgroundColor3 = Color3.fromRGB(0, 136, 255)
+end
+end)
+-- Fetch name tracking thread running background safely
+task.spawn(function()
+local success, info = pcall(function() return MarketplaceService:GetProductInfo(assetId) end)
+if success and info and info.Name then
+nameLbl.Text = typeName .. ": " .. info.Name
+else
+nameLbl.Text = typeName .. ": Asset ID [" .. tostring(assetId) .. "]"
+end
+end)
+end
+end
 end
 
--- GUI Display List Compiler
+-- Render Compilations Loop Layout Interface mapping
 local renderManagerPanel
 renderManagerPanel = function()
-    for _, child in pairs(ScrollFrame:GetChildren()) do
-        if child:IsA("Frame") then child:Destroy() end
-    end
-
-    for idx, data in ipairs(StorageData.outfits) do
-        local cardFrame = Instance.new("Frame")
-        cardFrame.Size = UDim2.new(1, -4, 0, 50)
-        cardFrame.BackgroundColor3 = Color3.fromRGB(30, 37, 51)
-        cardFrame.Parent = ScrollFrame
-
-        local cardCorner = Instance.new("UICorner")
-        cardCorner.CornerRadius = UDim.new(0, 6)
-        cardCorner.Parent = cardFrame
-
-        local nameLabel = Instance.new("TextLabel")
-        nameLabel.Size = UDim2.new(0.4, -5, 0, 22)
-        nameLabel.Position = UDim2.new(0, 10, 0, 4)
-        nameLabel.BackgroundTransparency = 1
-        nameLabel.Text = data.name or "Saved Outfit"
-        nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-        nameLabel.Font = Enum.Font.GothamBold
-        nameLabel.TextSize = 11
-        nameLabel.TextXAlignment = Enum.TextXAlignment.Left
-        nameLabel.Parent = cardFrame
-
-        local codeLabel = Instance.new("TextLabel")
-        codeLabel.Size = UDim2.new(0.4, -5, 0, 18)
-        codeLabel.Position = UDim2.new(0, 10, 0, 24)
-codeLabel.BackgroundTransparency = 1
-codeLabel.Text = "Code: " .. tostring(data.code)
-codeLabel.TextColor3 = Color3.fromRGB(0, 136, 255)
-codeLabel.Font = Enum.Font.GothamMedium
-codeLabel.TextSize = 10
-codeLabel.TextXAlignment = Enum.TextXAlignment.Left
-codeLabel.Parent = cardFrame
--- 1. OPEN Button (Shows complete inner layout specs)
+for _, child in pairs(SavedScroll:GetChildren()) do
+if child:IsA("Frame") then child:Destroy() end
+end
+for idx, data in ipairs(StorageData.outfits) do
+local card = Instance.new("Frame")
+card.Size = UDim2.new(1, -4, 0, 45)
+card.BackgroundColor3 = Color3.fromRGB(30, 37, 51)
+card.Parent = SavedScroll
+Instance.new("UICorner", card).CornerRadius = UDim.new(0, 5)
+local nameLbl = Instance.new("TextLabel")
+nameLbl.Size = UDim2.new(0.9, 0, 0, 18)
+nameLbl.Position = UDim2.new(0, 6, 0, 2)
+nameLbl.BackgroundTransparency = 1
+nameLbl.Text = data.name or "Outfit Profile"
+nameLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+nameLbl.Font = Enum.Font.GothamBold
+nameLbl.TextSize = 9
+nameLbl.TextXAlignment = Enum.TextXAlignment.Left
+nameLbl.Parent = card
+-- Control Panel Buttons Framework Layout
 local openBtn = Instance.new("TextButton")
-openBtn.Size = UDim2.new(0, 48, 0, 26)
-openBtn.Position = UDim2.new(1, -154, 0, 12)
+openBtn.Size = UDim2.new(0, 38, 0, 20)
+openBtn.Position = UDim2.new(0, 5, 0, 20)
 openBtn.BackgroundColor3 = Color3.fromRGB(230, 126, 34)
 openBtn.Text = "OPEN"
 openBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 openBtn.Font = Enum.Font.GothamBold
-openBtn.TextSize = 10
-openBtn.Parent = cardFrame
-local openCorner = Instance.new("UICorner")
-openCorner.CornerRadius = UDim.new(0, 4)
-openCorner.Parent = openBtn
-openBtn.MouseButton1Click:Connect(function()
-local struct = data.structureData
-local sID = struct and struct.Shirt or "0"
-local pID = struct and struct.Pants or "0"
-local accList = struct and (struct.accessories or struct.Items) or {}
-local accString = #accList > 0 and table.concat(accList, ", ") or "None"
-InfoText.Text = string.format("👕 Shirt ID: %s\n👖 Pants ID: %s\n👑 Accessories: %s", tostring(sID), tostring(pID), accString)
-end)
--- 2. WEAR Button
+openBtn.TextSize = 8
+openBtn.Parent = card
+Instance.new("UICorner", openBtn).CornerRadius = UDim.new(0, 4)
+openBtn.MouseButton1Click:Connect(function() displayVisualComponents(data.payload) end)
 local wearBtn = Instance.new("TextButton")
-wearBtn.Size = UDim2.new(0, 48, 0, 26)
-wearBtn.Position = UDim2.new(1, -102, 0, 12)
-wearBtn.BackgroundColor3 = Color3.fromRGB(0, 136, 255)
+wearBtn.Size = UDim2.new(0, 38, 0, 20)
+wearBtn.Position = UDim2.new(0, 47, 0, 20)
+wearBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
 wearBtn.Text = "WEAR"
 wearBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 wearBtn.Font = Enum.Font.GothamBold
-wearBtn.TextSize = 10
-wearBtn.Parent = cardFrame
-local wearCorner = Instance.new("UICorner")
-wearCorner.CornerRadius = UDim.new(0, 4)
-wearCorner.Parent = wearBtn
-wearBtn.MouseButton1Click:Connect(function()
-wearBtn.Text = "LOADING"
-wearBtn.BackgroundColor3 = Color3.fromRGB(100, 110, 120)
-applyGameOutfitStructure(data.structureData)
-task.wait(0.5)
-wearBtn.Text = "WEAR"
-wearBtn.BackgroundColor3 = Color3.fromRGB(0, 136, 255)
-end)
--- 3. DELETE Button
+wearBtn.TextSize = 8
+wearBtn.Parent = card
+Instance.new("UICorner", wearBtn).CornerRadius = UDim.new(0, 4)
+wearBtn.MouseButton1Click:Connect(function() applyComponentOutfit(data.payload) end)
 local delBtn = Instance.new("TextButton")
-delBtn.Size = UDim2.new(0, 48, 0, 26)
-delBtn.Position = UDim2.new(1, -52, 0, 12)
+delBtn.Size = UDim2.new(0, 32, 0, 20)
+delBtn.Position = UDim2.new(0, 89, 0, 20)
 delBtn.BackgroundColor3 = Color3.fromRGB(231, 76, 60)
 delBtn.Text = "DEL"
 delBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 delBtn.Font = Enum.Font.GothamBold
-delBtn.TextSize = 10
-delBtn.Parent = cardFrame
-local delCorner = Instance.new("UICorner")
-delCorner.CornerRadius = UDim.new(0, 4)
-delCorner.Parent = delBtn
+delBtn.TextSize = 8
+delBtn.Parent = card
+Instance.new("UICorner", delBtn).CornerRadius = UDim.new(0, 4)
 delBtn.MouseButton1Click:Connect(function()
 table.remove(StorageData.outfits, idx)
 saveStorage()
@@ -358,31 +425,38 @@ renderManagerPanel()
 end)
 end
 end
--- Analysis Initialization Execution Trigger
+-- Main Compilation Save Trigger Core Control Action
+local SaveBtn = Instance.new("TextButton")
+SaveBtn.Size = UDim2.new(0, 210, 0, 34)
+SaveBtn.Position = UDim2.new(0, 145, 1, -82)
+SaveBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
+SaveBtn.Text = "SAVE OUTFIT DESIGN PACKAGE"
+SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SaveBtn.Font = Enum.Font.GothamBold
+SaveBtn.TextSize = 11
+SaveBtn.Parent = MainFrame
+Instance.new("UICorner", SaveBtn).CornerRadius = UDim.new(0, 6)
 SaveBtn.MouseButton1Click:Connect(function()
-local nameText = NameInput.Text
-local codeText = string.upper(string.gsub(CodeInput.Text, "%s+", ""))
-if nameText == "" or codeText == "" then return end
-SaveBtn.Text = "FETCHING GAME DATABASE..."
-SaveBtn.BackgroundColor3 = Color3.fromRGB(230, 126, 34)
-local serverStructure = fetchAndAnalyzeGameCode(codeText)
-if not serverStructure then
-serverStructure = { Shirt = 0, Pants = 0, accessories = {} }
+local profileName = NameInput.Text
+if profileName == "" then return end
+local outfitPayload = {}
+for key, box in pairs(activeInputs) do
+outfitPayload[key] = tonumber(box.Text) or 0
 end
 table.insert(StorageData.outfits, {
-name = nameText,
-code = codeText,
-structureData = serverStructure
+name = profileName,
+payload = outfitPayload
 })
 saveStorage()
 renderManagerPanel()
+-- Empty input boxes field clean sequences
 NameInput.Text = ""
-CodeInput.Text = ""
-SaveBtn.Text = "OUTFIT SAVED SUCCESSFULLY! ✓"
-SaveBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
-task.wait(1.5)
-SaveBtn.Text = "ANALYSE GAME CODE & SAVE"
+for _, box in pairs(activeInputs) do box.Text = "" end
+SaveBtn.Text = "COMPONENTS SAVED SUCCESS! ✓"
+task.wait(1.2)
+SaveBtn.Text = "SAVE OUTFIT DESIGN PACKAGE"
 end)
--- Initialize System
+-- Main Sequence Operations Initialization
+buildTabFrames()
 loadStorage()
 renderManagerPanel()
