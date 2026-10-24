@@ -1,5 +1,5 @@
--- Deobfuscated & Enhanced for Life Together Outfit Manager
--- Created for Delta Executor Compatible GUI
+-- Life Together Advanced Outfit Analyzer & Manager
+-- Delta Executor Compatible | Built by Adaptive AI Framework
 
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
@@ -7,24 +7,24 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
 
 local LocalPlayer = Players.LocalPlayer
-local FILE_NAME = "LifeTogether_Outfits.json"
+local FILE_NAME = "LifeTogether_AnalyzedOutfits.json"
 
 -- Clean old instances to avoid GUI overlapping
 for _, gui in ipairs(CoreGui:GetChildren()) do
-    if gui.Name == "LT_OutfitManagerGui" then
+    if gui.Name == "LT_OutfitAnalyzerGui" then
         gui:Destroy()
     end
 end
 
--- GUI Main Root
+-- GUI Root Compilation
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "LT_OutfitManagerGui"
+ScreenGui.Name = "LT_OutfitAnalyzerGui"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = CoreGui
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 360, 0, 400)
-MainFrame.Position = UDim2.new(0.5, -180, 0.5, -200)
+MainFrame.Size = UDim2.new(0, 360, 0, 420)
+MainFrame.Position = UDim2.new(0.5, -180, 0.5, -210)
 MainFrame.BackgroundColor3 = Color3.fromRGB(18, 22, 30)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -35,7 +35,7 @@ local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 12)
 MainCorner.Parent = MainFrame
 
--- Top Bar Title Panel
+-- Top Bar Component
 local TopBar = Instance.new("Frame")
 TopBar.Size = UDim2.new(1, 0, 0, 45)
 TopBar.BackgroundColor3 = Color3.fromRGB(26, 32, 44)
@@ -50,10 +50,10 @@ local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, -50, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "LIFE TOGETHER OUTFIT MANAGER 👗"
+Title.Text = "OUTFIT CODE ANALYZER & MANAGER ⚙️"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 13
+Title.TextSize = 12
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TopBar
 
@@ -75,12 +75,12 @@ CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- Inputs Section
+-- Form Fields
 local NameInput = Instance.new("TextBox")
 NameInput.Size = UDim2.new(0.9, 0, 0, 36)
 NameInput.Position = UDim2.new(0.05, 0, 0, 60)
 NameInput.BackgroundColor3 = Color3.fromRGB(30, 37, 51)
-NameInput.PlaceholderText = "Enter Outfit Name (e.g., Casual Red)..."
+NameInput.PlaceholderText = "Give this outfit a custom name..."
 NameInput.Text = ""
 NameInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 NameInput.Font = Enum.Font.Gotham
@@ -96,14 +96,17 @@ NameCorner.CornerRadius = UDim.new(0, 6)
 NameCorner.Parent = NameInput
 
 local CodeInput = Instance.new("TextBox")
-CodeInput.Size = UDim2.new(0.9, 0, 0, 36)
+CodeInput.Size = UDim2.new(0.9, 0, 0, 50)
 CodeInput.Position = UDim2.new(0.05, 0, 0, 105)
 CodeInput.BackgroundColor3 = Color3.fromRGB(30, 37, 51)
-CodeInput.PlaceholderText = "Enter Outfit Code (ShirtID,PantsID)..."
+CodeInput.PlaceholderText = "Paste the raw outfit code bundle string here..."
 CodeInput.Text = ""
+CodeInput.ClearTextOnFocus = false
+CodeInput.MultiLine = true
+CodeInput.TextWrapped = true
 CodeInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 CodeInput.Font = Enum.Font.Gotham
-CodeInput.TextSize = 12
+CodeInput.TextSize = 11
 CodeInput.Parent = MainFrame
 
 local CodePadding = Instance.new("UIPadding")
@@ -114,25 +117,25 @@ local CodeCorner = Instance.new("UICorner")
 CodeCorner.CornerRadius = UDim.new(0, 6)
 CodeCorner.Parent = CodeInput
 
--- Save Action Button
+-- Action Processor Button
 local SaveBtn = Instance.new("TextButton")
 SaveBtn.Size = UDim2.new(0.9, 0, 0, 38)
-SaveBtn.Position = UDim2.new(0.05, 0, 0, 150)
+SaveBtn.Position = UDim2.new(0.05, 0, 0, 165)
 SaveBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
-SaveBtn.Text = "SAVE CURRENT OUTFIT TO LIST"
+SaveBtn.Text = "ANALYSE & SAVE TO STORAGE FILE"
 SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 SaveBtn.Font = Enum.Font.GothamBold
-SaveBtn.TextSize = 12
+SaveBtn.TextSize = 11
 SaveBtn.Parent = MainFrame
 
 local SaveBtnCorner = Instance.new("UICorner")
 SaveBtnCorner.CornerRadius = UDim.new(0, 6)
 SaveBtnCorner.Parent = SaveBtn
 
--- Scroll List Frame for Saved Outfits
+-- Scroll List Window
 local ScrollFrame = Instance.new("ScrollingFrame")
-ScrollFrame.Size = UDim2.new(0.9, 0, 0, 190)
-ScrollFrame.Position = UDim2.new(0.05, 0, 0, 200)
+ScrollFrame.Size = UDim2.new(0.9, 0, 0, 195)
+ScrollFrame.Position = UDim2.new(0.05, 0, 0, 215)
 ScrollFrame.BackgroundTransparency = 1
 ScrollFrame.ScrollBarThickness = 4
 ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 136, 255)
@@ -147,24 +150,23 @@ ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 10)
 end)
 
--- File Storage Infrastructure
-local SavedData = { outfits = {} }
+-- Storage Architecture
+local StorageData = { outfits = {} }
 
 local function loadStorage()
     if readfile and isfile and isfile(FILE_NAME) then
         pcall(function()
-            SavedData = HttpService:JSONDecode(readfile(FILE_NAME))
+            StorageData = HttpService:JSONDecode(readfile(FILE_NAME))
         end)
     end
 end
 
 local function saveStorage()
     if writefile then
-        writefile(FILE_NAME, HttpService:JSONEncode(SavedData))
+        writefile(FILE_NAME, HttpService:JSONEncode(StorageData))
     end
 end
 
--- Network Handling Module for Core Logic
 local function getNetModule()
     local success, net = pcall(function() 
         return require(ReplicatedStorage.Modules.Core.Net) 
@@ -172,12 +174,25 @@ local function getNetModule()
     return success and net or nil
 end
 
--- Outfit Processing Engine (Delete and Wear Execution)
-local function applyOutfitCode(outfitCodeString)
+-- String Processing / Int Regex Extraction Engine
+local function analyzeCodeString(rawString)
+    local extractedIds = {}
+    -- Pure numeric continuous segments ko scan karne ka mathematical loop
+    for id in string.gmatch(rawString, "%d+") do
+        local numericVal = tonumber(id)
+        if numericVal and numericVal > 100000 then -- Filters out low default parameters/flags
+            table.insert(extractedIds, numericVal)
+        end
+    end
+    return extractedIds
+end
+
+-- Deep Execution Routine: Wipe followed by Array Asset Deployment
+local function applyAnalyzedAssetArray(idArray)
     local Net = getNetModule()
     if not Net then return end
 
-    -- Step 1: Complete Wipe/Delete System
+    -- Step 1: Force Global State Wipe
     pcall(function()
         Net.send("wear_outfit_from_desc", {
             ["accessories"] = {},
@@ -193,35 +208,35 @@ local function applyOutfitCode(outfitCodeString)
         })
     end)
     
-    task.wait(0.3) -- Essential buffer timing for clean server wipe
+    task.wait(0.4) -- Buffer constraint to sync network clean-up state
 
-    -- Step 2: Extract Life Together code format tokens
-    local shirtId, pantsId = string.match(outfitCodeString, "([^,]+),([^,]+)")
-    if not shirtId or not pantsId then
-        shirtId = outfitCodeString:match("^%d+$")
-        pantsId = 0
-    end
-
-    -- Step 3: Server Remote Invocation to apply codes
-    if shirtId and tonumber(shirtId) ~= 0 then
-        pcall(function() Net.get("code", tonumber(shirtId), "Shirt") end)
-        task.wait(0.2)
-    end
-    if pantsId and tonumber(pantsId) ~= 0 then
-        pcall(function() Net.get("code", tonumber(pantsId), "Pants") end)
+    -- Step 2: Adaptive Context Engine for Life Together Remote Targets
+    -- Array ki unique ordering ko read karke process apply karna
+    for index, assetId in ipairs(idArray) do
+        pcall(function()
+            if index == 1 then
+                Net.get("code", assetId, "Shirt")
+            elseif index == 2 then
+                Net.get("code", assetId, "Pants")
+            else
+                -- Fallback sequence explicitly routes remaining values to Accessories
+                Net.get("code", assetId, "Accessory")
+            end
+        end)
+        task.wait(0.25) -- Safe firing cooldown parameters to avoid remote exhaustion throttling
     end
 end
 
--- UI Dynamic Compilation & Layout Rendering
+-- Dynamic Content Generation Logic
 local renderManagerPanel
 renderManagerPanel = function()
     for _, child in pairs(ScrollFrame:GetChildren()) do
         if child:IsA("Frame") then child:Destroy() end
     end
 
-    for idx, data in ipairs(SavedData.outfits) do
+    for idx, data in ipairs(StorageData.outfits) do
         local cardFrame = Instance.new("Frame")
-        cardFrame.Size = UDim2.new(1, -4, 0, 45)
+        cardFrame.Size = UDim2.new(1, -4, 0, 50)
         cardFrame.BackgroundColor3 = Color3.fromRGB(28, 35, 48)
         cardFrame.Parent = ScrollFrame
 
@@ -230,20 +245,31 @@ renderManagerPanel = function()
         cardCorner.Parent = cardFrame
 
         local nameLabel = Instance.new("TextLabel")
-        nameLabel.Size = UDim2.new(0.5, 0, 1, 0)
-        nameLabel.Position = UDim2.new(0, 10, 0, 0)
+        nameLabel.Size = UDim2.new(0.5, -5, 0, 22)
+        nameLabel.Position = UDim2.new(0, 10, 0, 4)
         nameLabel.BackgroundTransparency = 1
-        nameLabel.Text = data.name or "Unnamed Outfit"
+        nameLabel.Text = data.name or "Saved Configuration"
         nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-        nameLabel.Font = Enum.Font.GothamMedium
+        nameLabel.Font = Enum.Font.GothamBold
         nameLabel.TextSize = 11
         nameLabel.TextXAlignment = Enum.TextXAlignment.Left
         nameLabel.Parent = cardFrame
 
-        -- WEAR Operation Event
+        local debugLabel = Instance.new("TextLabel")
+        debugLabel.Size = UDim2.new(0.5, -5, 0, 18)
+        debugLabel.Position = UDim2.new(0, 10, 0, 24)
+        debugLabel.BackgroundTransparency = 1
+        debugLabel.Text = "Detected Assets: " .. tostring(#data.analyzedIds) .. " pieces"
+        debugLabel.TextColor3 = Color3.fromRGB(150, 160, 185)
+        debugLabel.Font = Enum.Font.Gotham
+        debugLabel.TextSize = 9
+        debugLabel.TextXAlignment = Enum.TextXAlignment.Left
+        debugLabel.Parent = cardFrame
+
+        -- Wear Operation
         local wearBtn = Instance.new("TextButton")
-        wearBtn.Size = UDim2.new(0, 50, 0, 26)
-        wearBtn.Position = UDim2.new(1, -115, 0, 9)
+        wearBtn.Size = UDim2.new(0, 52, 0, 28)
+        wearBtn.Position = UDim2.new(1, -118, 0, 11)
         wearBtn.BackgroundColor3 = Color3.fromRGB(0, 136, 255)
         wearBtn.Text = "WEAR"
         wearBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -254,55 +280,58 @@ renderManagerPanel = function()
         local wearCorner = Instance.new("UICorner")
         wearCorner.CornerRadius = UDim.new(0, 4)
         wearCorner.Parent = wearBtn
-
-        wearBtn.MouseButton1Click:Connect(function()
-            wearBtn.Text = "LOADING"
-            wearBtn.BackgroundColor3 = Color3.fromRGB(100, 110, 120)
-            applyOutfitCode(data.code)
-            task.wait(0.5)
-            wearBtn.Text = "WEAR"
-            wearBtn.BackgroundColor3 = Color3.fromRGB(0, 136, 255)
-        end)
-
-        -- DELETE Operation Event
-        local delBtn = Instance.new("TextButton")
-        delBtn.Size = UDim2.new(0, 50, 0, 26)
-        delBtn.Position = UDim2.new(1, -60, 0, 9)
-        delBtn.BackgroundColor3 = Color3.fromRGB(231, 76, 60)
-        delBtn.Text = "DELETE"
-        delBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        delBtn.Font = Enum.Font.GothamBold
-        delBtn.TextSize = 10
-        delBtn.Parent = cardFrame
-
-        local delCorner = Instance.new("UICorner")
-        delCorner.CornerRadius = UDim.new(0, 4)
-        delCorner.Parent = delBtn
-
-        delBtn.MouseButton1Click:Connect(function()
-            table.remove(SavedData.outfits, idx)
-            saveStorage()
-            renderManagerPanel()
-        end)
-    end
+wearBtn.MouseButton1Click:Connect(function()
+wearBtn.Text = "LOADING"
+wearBtn.BackgroundColor3 = Color3.fromRGB(100, 110, 120)
+applyAnalyzedAssetArray(data.analyzedIds)
+task.wait(0.2)
+wearBtn.Text = "WEAR"
+wearBtn.BackgroundColor3 = Color3.fromRGB(0, 136, 255)
+end)
+-- Delete Operation
+local delBtn = Instance.new("TextButton")
+delBtn.Size = UDim2.new(0, 52, 0, 28)
+delBtn.Position = UDim2.new(1, -60, 0, 11)
+delBtn.BackgroundColor3 = Color3.fromRGB(231, 76, 60)
+delBtn.Text = "DELETE"
+delBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+delBtn.Font = Enum.Font.GothamBold
+delBtn.TextSize = 10
+delBtn.Parent = cardFrame
+local delCorner = Instance.new("UICorner")
+delCorner.CornerRadius = UDim.new(0, 4)
+delCorner.Parent = delBtn
+delBtn.MouseButton1Click:Connect(function()
+table.remove(StorageData.outfits, idx)
+saveStorage()
+renderManagerPanel()
+end)
 end
-
--- Save Input Button Logic
+end
+-- Analysis Initialization Execution Trigger
 SaveBtn.MouseButton1Click:Connect(function()
 local nameText = NameInput.Text
 local codeText = CodeInput.Text
 if nameText == "" or codeText == "" then return end
-table.insert(SavedData.outfits, {
+-- Raw code input text se sirf unique IDs filter out karna
+local elementsFound = analyzeCodeString(codeText)
+if #elementsFound == 0 then
+SaveBtn.Text = "NO VALID ASSET IDS FOUND! ❌"
+task.wait(1.5)
+SaveBtn.Text = "ANALYSE & SAVE TO STORAGE FILE"
+return
+end
+table.insert(StorageData.outfits, {
 name = nameText,
-code = codeText
+analyzedIds = elementsFound
 })
 saveStorage()
 renderManagerPanel()
 NameInput.Text = ""
 CodeInput.Text = ""
-SaveBtn.Text = "OUTFIT SAVED! ✔"
-task.wait(1)
-SaveBtn.Text = "SAVE CURRENT OUTFIT TO LIST"
+SaveBtn.Text = "ANALYSIS COMPLETE & SAVED! ✓"
+task.wait(1.2)
+SaveBtn.Text = "ANALYSE & SAVE TO STORAGE FILE"
 end)
 -- Main Initializers
 loadStorage()
