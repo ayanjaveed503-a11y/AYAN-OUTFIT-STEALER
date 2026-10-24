@@ -1,5 +1,5 @@
 -- Life Together Custom Code Alphanumeric Analyzer & Storage
--- Delta Executor Optimized GUI
+-- Delta Executor Optimized GUI | Fixed Line-by-Line Asset Wear Engine
 
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
@@ -176,12 +176,10 @@ local function fetchAndAnalyzeGameCode(gameCode)
     if not Net then return nil end
 
     local outfitData = nil
-    -- Game ke specific remote ko invoke karke pure alphanumeric code ka asset array dhoondna
     pcall(function()
         outfitData = Net.get("GetOutfit", gameCode) or Net.get("outfits", "get", gameCode)
     end)
 
-    -- Game server internal format verification fallback
     if not outfitData then
         pcall(function()
             outfitData = ReplicatedStorage.Remotes.GetOutfit:InvokeServer(gameCode)
@@ -191,12 +189,12 @@ local function fetchAndAnalyzeGameCode(gameCode)
     return outfitData
 end
 
--- Deep Clean Wipe & Wear Execution
+-- Deep Clean Wipe & Optimized Wear Execution (Line-by-Line Loading)
 local function applyGameOutfitStructure(outfitStructure)
     local Net = getNetModule()
     if not Net then return end
 
-    -- Step 1: Force Full Empty Character State Wipe
+    -- Step 1: Force Full Empty Character State Wipe (Kapre utarne ke liye)
     pcall(function()
         Net.send("wear_outfit_from_desc", {
             ["accessories"] = {},
@@ -212,30 +210,45 @@ local function applyGameOutfitStructure(outfitStructure)
         })
     end)
     
-    task.wait(0.4) -- Sync latency timing buffer
+    task.wait(0.5) -- Server data clear hone ka buffer timing
 
-    -- Step 2: Game data tables parse karke asset execution loop chalana
+    -- Step 2: Line-by-Line Asset Execution Engine (Ek ek karke IDs check aur wear karna)
     if type(outfitStructure) == "table" then
-        -- Shirt & Pants Processing
+        
+        -- 1. Shirt Apply block
         if outfitStructure.Shirt and tonumber(outfitStructure.Shirt) ~= 0 then
-            pcall(function() Net.get("code", tonumber(outfitStructure.Shirt), "Shirt") end)
-            task.wait(0.2)
+            pcall(function() 
+                Net.get("code", tonumber(outfitStructure.Shirt), "Shirt") 
+            end)
+            task.wait(0.3) -- Stable item loading delay
         end
+        
+        -- 2. Pants Apply block
         if outfitStructure.Pants and tonumber(outfitStructure.Pants) ~= 0 then
-            pcall(function() Net.get("code", tonumber(outfitStructure.Pants), "Pants") end)
-            task.wait(0.2)
+            pcall(function() 
+                Net.get("code", tonumber(outfitStructure.Pants), "Pants") 
+            end)
+            task.wait(0.3) -- Stable item loading delay
         end
 
-        -- Accessories table processing loop
+        -- 3. Accessories Layer Apply loop
         if outfitStructure.accessories and type(outfitStructure.accessories) == "table" then
             for _, accId in ipairs(outfitStructure.accessories) do
-                pcall(function() Net.get("code", tonumber(accId), "Accessory") end)
-                task.wait(0.25)
+                if tonumber(accId) ~= 0 then
+                    pcall(function() 
+                        Net.get("code", tonumber(accId), "Accessory") 
+                    end)
+                    task.wait(0.3) -- Safe anti-throttle thread delay
+                end
             end
-        elseif type(outfitStructure.Items) == "table" then -- Backup game structural key mapping
+        elseif type(outfitStructure.Items) == "table" then -- Backup data structure key mapping
             for _, accId in ipairs(outfitStructure.Items) do
-                pcall(function() Net.get("code", tonumber(accId), "Accessory") end)
-                task.wait(0.25)
+                if tonumber(accId) ~= 0 then
+                    pcall(function() 
+                        Net.get("code", tonumber(accId), "Accessory") 
+                    end)
+                    task.wait(0.3)
+                end
             end
         end
     end
@@ -273,16 +286,15 @@ renderManagerPanel = function()
         codeLabel.Size = UDim2.new(0.5, -5, 0, 18)
         codeLabel.Position = UDim2.new(0, 10, 0, 24)
         codeLabel.BackgroundTransparency = 1
-        codeLabel.Text = "Code: " .. tostring(data.code)
-        codeLabel.TextColor3 = Color3.fromRGB(0, 136, 255)
-        codeLabel.Font = Enum.Font.GothamMedium
-        codeLabel.TextSize = 10
-        codeLabel.TextXAlignment = Enum.TextXAlignment.Left
-        codeLabel.Parent = cardFrame
-
-        -- WEAR Operation Trigger
-        local wearBtn = Instance.new("TextButton")
-        wearBtn.Size = UDim2.new(0, 52, 0, 28)
+codeLabel.Text = "Code: " .. tostring(data.code)
+codeLabel.TextColor3 = Color3.fromRGB(0, 136, 255)
+codeLabel.Font = Enum.Font.GothamMedium
+codeLabel.TextSize = 10
+codeLabel.TextXAlignment = Enum.TextXAlignment.Left
+codeLabel.Parent = cardFrame
+-- WEAR Operation Trigger
+local wearBtn = Instance.new("TextButton")
+wearBtn.Size = UDim2.new(0, 52, 0, 28)
 wearBtn.Position = UDim2.new(1, -118, 0, 11)
 wearBtn.BackgroundColor3 = Color3.fromRGB(0, 136, 255)
 wearBtn.Text = "WEAR"
@@ -324,13 +336,12 @@ end
 -- Analysis Initialization Execution Trigger
 SaveBtn.MouseButton1Click:Connect(function()
 local nameText = NameInput.Text
-local codeText = string.upper(string.gsub(CodeInput.Text, "%s+", "")) -- Alphanumeric clean spaces auto upper
+local codeText = string.upper(string.gsub(CodeInput.Text, "%s+", ""))
 if nameText == "" or codeText == "" then return end
 SaveBtn.Text = "FETCHING GAME DATA..."
 SaveBtn.BackgroundColor3 = Color3.fromRGB(230, 126, 34)
 local serverStructure = fetchAndAnalyzeGameCode(codeText)
 if not serverStructure then
--- Agar network check fail ho jaye, to default table structure backup build karna taaki safe save ho sake
 serverStructure = {
 Shirt = 0,
 Pants = 0,
