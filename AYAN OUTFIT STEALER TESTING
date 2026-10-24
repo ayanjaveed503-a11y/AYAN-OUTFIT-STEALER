@@ -1,5 +1,5 @@
 -- Deobfuscated by AYAN
--- AYAN W4S H3R3 & Optimized V3 Fixed
+-- AYAN W4S H3R3 & Optimized V3 Final Stable With Confirmation Warning
 
 -- Services
 local Players = game:GetService("Players")
@@ -80,6 +80,67 @@ SaveListLayout.Parent = SaveScroll
 SaveListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     SaveScroll.CanvasSize = UDim2.new(0, 0, 0, SaveListLayout.AbsoluteContentSize.Y + 10)
 end)
+
+-- FIXED: Central Confirmation Warning Pop-Up Frame Setup
+local WarnFrame = Instance.new("Frame")
+WarnFrame.Size = UDim2.new(0, 240, 0, 120)
+WarnFrame.Position = UDim2.new(0.5, -120, 0.5, -60)
+WarnFrame.BackgroundColor3 = Color3.fromRGB(33, 39, 52)
+WarnFrame.BorderSizePixel = 0
+WarnFrame.ZIndex = 50
+WarnFrame.Visible = false
+WarnFrame.Parent = MainFrame
+
+local WarnCorner = Instance.new("UICorner")
+WarnCorner.CornerRadius = UDim.new(0, 8)
+WarnCorner.Parent = WarnFrame
+
+local WarnStroke = Instance.new("UIStroke")
+WarnStroke.Thickness = 1.5
+WarnStroke.Color = Color3.fromRGB(231, 76, 60)
+WarnStroke.Parent = WarnFrame
+
+local WarnLabel = Instance.new("TextLabel")
+WarnLabel.Size = UDim2.new(1, -20, 0, 50)
+WarnLabel.Position = UDim2.new(0, 10, 0, 10)
+WarnLabel.BackgroundTransparency = 1
+WarnLabel.Text = "Are you sure you want to delete this outfit?"
+WarnLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+WarnLabel.Font = Enum.Font.GothamBold
+WarnLabel.TextSize = 11
+WarnLabel.TextWrapped = true
+WarnLabel.ZIndex = 51
+WarnLabel.Parent = WarnFrame
+
+local YesBtn = Instance.new("TextButton")
+YesBtn.Size = UDim2.new(0, 95, 0, 30)
+YesBtn.Position = UDim2.new(0, 15, 1, -40)
+YesBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
+YesBtn.Text = "YES"
+YesBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+YesBtn.Font = Enum.Font.GothamBold
+YesBtn.TextSize = 11
+YesBtn.ZIndex = 51
+YesBtn.Parent = WarnFrame
+
+local YesCorner = Instance.new("UICorner")
+YesCorner.CornerRadius = UDim.new(0, 5)
+YesCorner.Parent = YesBtn
+
+local NoBtn = Instance.new("TextButton")
+NoBtn.Size = UDim2.new(0, 95, 0, 30)
+NoBtn.Position = UDim2.new(1, -110, 1, -40)
+NoBtn.BackgroundColor3 = Color3.fromRGB(231, 76, 60)
+NoBtn.Text = "NO"
+NoBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+NoBtn.Font = Enum.Font.GothamBold
+NoBtn.TextSize = 11
+NoBtn.ZIndex = 51
+NoBtn.Parent = WarnFrame
+
+local NoCorner = Instance.new("UICorner")
+NoCorner.CornerRadius = UDim.new(0, 5)
+NoCorner.Parent = NoBtn
 
 -- Top Bar
 local TopBar = Instance.new("Frame")
@@ -234,67 +295,59 @@ DropdownList.ScrollBarThickness = 4
 DropdownList.ZIndex = 10
 DropdownList.Visible = false
 DropdownList.Parent = MainFrame
-
 local DropLayout = Instance.new("UIListLayout")
 DropLayout.Padding = UDim.new(0, 2)
 DropLayout.Parent = DropdownList
-
 -- Data Storage Management
 local LoadedData = { outfits = {} }
 local currentScannedOutfit = nil
-
 local function loadStorage()
-    if readfile and isfile and isfile(FILE_NAME) then
-        pcall(function()
-            LoadedData = HttpService:JSONDecode(readfile(FILE_NAME))
-        end)
-    end
-end
-
-local function saveStorage()
-    if writefile then
-        writefile(FILE_NAME, HttpService:JSONEncode(LoadedData))
-    end
-end
-
-local function getNetModule()
-    local success, net = pcall(function() return require(ReplicatedStorage.Modules.Core.Net) end)
-    return success and net or nil
-end
-
--- UI Closures & Minimize Glitch Fix
-CloseBtn.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
+if readfile and isfile and isfile(FILE_NAME) then
+pcall(function()
+LoadedData = HttpService:JSONDecode(readfile(FILE_NAME))
 end)
-
+end
+end
+local function saveStorage()
+if writefile then
+writefile(FILE_NAME, HttpService:JSONEncode(LoadedData))
+end
+end
+local function getNetModule()
+local success, net = pcall(function() return require(ReplicatedStorage.Modules.Core.Net) end)
+return success and net or nil
+end
+-- UI Closures
+CloseBtn.MouseButton1Click:Connect(function()
+ScreenGui:Destroy()
+end)
 local isMinimized = false
 MinimizeBtn.MouseButton1Click:Connect(function()
-    isMinimized = not isMinimized
-    if isMinimized then
-        MainFrame.Size = UDim2.new(0, 340, 0, 40)
-        MinimizeBtn.Text = "+"
-        DropdownList.Visible = false
-        SavePanel.Visible = false
-        DropdownToggle.Text = "▼"
-    else
-        MainFrame.Size = UDim2.new(0, 340, 0, 380)
-        MinimizeBtn.Text = "-"
-        SavePanel.Visible = true  
-    end
+isMinimized = not isMinimized
+if isMinimized then
+MainFrame.Size = UDim2.new(0, 340, 0, 40)
+MinimizeBtn.Text = "+"
+DropdownList.Visible = false
+SavePanel.Visible = false
+DropdownToggle.Text = "▼"
+else
+MainFrame.Size = UDim2.new(0, 340, 0, 380)
+MinimizeBtn.Text = "-"
+SavePanel.Visible = true
+end
 end)
-
 DropdownToggle.MouseButton1Click:Connect(function()
-    if isMinimized then return end
-    DropdownList.Visible = not DropdownList.Visible
-    if DropdownList.Visible then
-        DropdownToggle.Text = "▲"
-        for _, child in pairs(DropdownList:GetChildren()) do
-            if child:IsA("TextButton") then child:Destroy() end
-        end
-        local playerList = Players:GetPlayers()
-        for _, plr in ipairs(playerList) do
-            local btn = Instance.new("TextButton")
-            btn.Size = UDim2.new(1, -8, 0, 28)
+if isMinimized then return end
+DropdownList.Visible = not DropdownList.Visible
+if DropdownList.Visible then
+DropdownToggle.Text = "▲"
+for _, child in pairs(DropdownList:GetChildren()) do
+if child:IsA("TextButton") then child:Destroy() end
+end
+local playerList = Players:GetPlayers()
+for _, plr in ipairs(playerList) do
+local btn = Instance.new("TextButton")
+btn.Size = UDim2.new(1, -8, 0, 28)
 btn.BackgroundColor3 = Color3.fromRGB(35, 42, 55)
 btn.Text = " " .. plr.Name
 btn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -314,18 +367,19 @@ else
 DropdownToggle.Text = "▼"
 end
 end)
+
 -- Helper Functions
 local function createItemCard(category, assetId)
 local itemFrame = Instance.new("Frame")
-itemFrame.Size = UDim2.new(1, -8, 0, 48)
+itemFrame.Size = UDim2.new(1, -8, 0, 54)
 itemFrame.BackgroundColor3 = Color3.fromRGB(35, 42, 55)
 itemFrame.Parent = ScrollFrame
 local frameCorner = Instance.new("UICorner")
 frameCorner.CornerRadius = UDim.new(0, 6)
 frameCorner.Parent = itemFrame
 local imgPreview = Instance.new("ImageLabel")
-imgPreview.Size = UDim2.new(0, 38, 0, 38)
-imgPreview.Position = UDim2.new(0, 5, 0, 5)
+imgPreview.Size = UDim2.new(0, 42, 0, 42)
+imgPreview.Position = UDim2.new(0, 6, 0, 6)
 imgPreview.BackgroundColor3 = Color3.fromRGB(25, 30, 40)
 imgPreview.Image = "rbxthumb://type=Asset&id=" .. tostring(assetId) .. "&w=150&h=150"
 imgPreview.Parent = itemFrame
@@ -333,17 +387,18 @@ local imgCorner = Instance.new("UICorner")
 imgCorner.CornerRadius = UDim.new(0, 4)
 imgCorner.Parent = imgPreview
 local label = Instance.new("TextLabel")
-label.Size = UDim2.new(0.52, 0, 1, 0)
-label.Position = UDim2.new(0, 48, 0, 0)
+label.Size = UDim2.new(0.50, 0, 1, -6)
+label.Position = UDim2.new(0, 54, 0, 3)
 label.BackgroundTransparency = 1
 label.RichText = true
+label.TextWrapped = true
 local prefixText = "" .. category .. " [" .. tostring(assetId) .. "]"
-label.Text = prefixText .. "Loading..."
+label.Text = prefixText .. "Loading Name..."
 label.TextColor3 = Color3.fromRGB(255, 255, 255)
 label.TextXAlignment = Enum.TextXAlignment.Left
+label.TextYAlignment = Enum.TextYAlignment.Top
 label.Font = Enum.Font.GothamMedium
 label.TextSize = 9
-label.TextTruncate = Enum.TextTruncate.AtEnd
 label.Parent = itemFrame
 task.spawn(function()
 local success, info = pcall(function() return MarketplaceService:GetProductInfo(assetId) end)
@@ -355,7 +410,7 @@ end
 end)
 local copyBtn = Instance.new("TextButton")
 copyBtn.Size = UDim2.new(0, 62, 0, 26)
-copyBtn.Position = UDim2.new(1, -68, 0, 11)
+copyBtn.Position = UDim2.new(1, -68, 0, 14)
 copyBtn.BackgroundColor3 = Color3.fromRGB(0, 110, 220)
 copyBtn.Text = "COPY"
 copyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -376,8 +431,8 @@ copyBtn.BackgroundColor3 = Color3.fromRGB(0, 110, 220)
 end
 end)
 end
-
 local renderSavedPanel
+local pendingDeleteIdx = nil
 renderSavedPanel = function()
 for _, child in pairs(SaveScroll:GetChildren()) do
 if child:IsA("Frame") then child:Destroy() end
@@ -407,6 +462,7 @@ LoadedData.outfits[idx].name = nameEditor.Text
 saveStorage()
 end
 end)
+
 local openBtn = Instance.new("TextButton")
 openBtn.Size = UDim2.new(0, 42, 0, 20)
 openBtn.Position = UDim2.new(0, 6, 0, 26)
@@ -458,7 +514,6 @@ Net.send("wear_outfit_from_desc", {
 })
 task.wait(0.2)
 end)
-
 task.spawn(function()
 for _, item in ipairs(data.items) do
 local rawType = item.category
@@ -491,13 +546,28 @@ delBtn.Parent = savedFrame
 local delCorner = Instance.new("UICorner")
 delCorner.CornerRadius = UDim.new(0, 4)
 delCorner.Parent = delBtn
+
+-- FIXED: Clicking DEL now safely interrupts data removal and fires the Warning Popup Menu instead
 delBtn.MouseButton1Click:Connect(function()
-table.remove(LoadedData.outfits, idx)
-saveStorage()
-renderSavedPanel()
+pendingDeleteIdx = idx
+WarnFrame.Visible = true
 end)
 end
 end
+-- FIXED: Connection closures for Confirmation Prompts
+YesBtn.MouseButton1Click:Connect(function()
+if pendingDeleteIdx then
+table.remove(LoadedData.outfits, pendingDeleteIdx)
+saveStorage()
+pendingDeleteIdx = nil
+WarnFrame.Visible = false
+renderSavedPanel()
+end
+end)
+NoBtn.MouseButton1Click:Connect(function()
+pendingDeleteIdx = nil
+WarnFrame.Visible = false
+end)
 ActionPanelSaveBtn.MouseButton1Click:Connect(function()
 if not currentScannedOutfit or #currentScannedOutfit.items == 0 then return end
 local outfitToSave = {
@@ -514,7 +584,6 @@ ActionPanelSaveBtn.Text = "SAVED! ✔"
 task.wait(1)
 ActionPanelSaveBtn.Text = "SAVE OUTFIT"
 end)
--- FIXED: Target character search mechanism simplified for absolute player execution
 local function getCharacterByName(nameQuery)
 local cleanName = string.match(nameQuery, "^%s*(.-)%s*$"):lower()
 if cleanName == "" then return nil end
@@ -544,7 +613,6 @@ end
 end
 return false
 end
-
 -- Button Logics
 RevealBtn.MouseButton1Click:Connect(function()
 DropdownList.Visible = false
