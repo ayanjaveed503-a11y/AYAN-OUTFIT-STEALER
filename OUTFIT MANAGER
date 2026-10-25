@@ -1,6 +1,7 @@
 -- Life Together Live Character Scanner & Outfit Storage Engine
 -- Delta Executor Optimized GUI | Pure Character Asset Scan System
 -- Modified & Enhanced by ZM_AYANUU Custom Branding Framework
+-- FIXED: UI Component Layer Visibility & Screen Rendering Engine Patched
 
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
@@ -31,6 +32,7 @@ MainFrame.BackgroundColor3 = Color3.fromRGB(20, 24, 33)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
+MainFrame.ZIndex = 5 -- FIXED: ZIndex layer adjustment to stay visible over parent contexts
 MainFrame.Parent = ScreenGui
 
 local MainCorner = Instance.new("UICorner")
@@ -42,6 +44,7 @@ local TopBar = Instance.new("Frame")
 TopBar.Size = UDim2.new(1, 0, 0, 45)
 TopBar.BackgroundColor3 = Color3.fromRGB(28, 34, 46)
 TopBar.BorderSizePixel = 0
+TopBar.ZIndex = 6
 TopBar.Parent = MainFrame
 
 local TopCorner = Instance.new("UICorner")
@@ -51,16 +54,16 @@ TopCorner.Parent = TopBar
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, -90, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
-Title.DynamicResource = ""
 Title.BackgroundTransparency = 1
 Title.Text = "MADE BY ZM_AYANUU 👑"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 13
 Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.ZIndex = 7
 Title.Parent = TopBar
 
--- NEW: Minimize Control Operation Trigger
+-- Minimize Control Operation Trigger
 local MinimizeBtn = Instance.new("TextButton")
 MinimizeBtn.Size = UDim2.new(0, 26, 0, 26)
 MinimizeBtn.Position = UDim2.new(1, -65, 0, 9)
@@ -69,6 +72,7 @@ MinimizeBtn.Text = "-"
 MinimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 MinimizeBtn.Font = Enum.Font.GothamBold
 MinimizeBtn.TextSize = 16
+MinimizeBtn.ZIndex = 7
 MinimizeBtn.Parent = TopBar
 Instance.new("UICorner", MinimizeBtn).CornerRadius = UDim.new(0, 5)
 
@@ -80,6 +84,7 @@ CloseBtn.Text = "X"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.TextSize = 12
+CloseBtn.ZIndex = 7
 CloseBtn.Parent = TopBar
 
 local CloseCorner = Instance.new("UICorner")
@@ -113,6 +118,7 @@ NameInput.Text = ""
 NameInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 NameInput.Font = Enum.Font.Gotham
 NameInput.TextSize = 12
+NameInput.ZIndex = 6
 NameInput.Parent = MainFrame
 
 local NamePadding = Instance.new("UIPadding")
@@ -129,6 +135,7 @@ ScanBtn.Text = "📸 SCAN & SAVE MY CURRENT LIVE FIT"
 ScanBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 ScanBtn.Font = Enum.Font.GothamBold
 ScanBtn.TextSize = 12
+ScanBtn.ZIndex = 6
 ScanBtn.Parent = MainFrame
 Instance.new("UICorner", ScanBtn).CornerRadius = UDim.new(0, 6)
 
@@ -140,6 +147,7 @@ ScrollFrame.BackgroundTransparency = 1
 ScrollFrame.ScrollBarThickness = 4
 ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 136, 255)
 ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+ScrollFrame.ZIndex = 6
 ScrollFrame.Parent = MainFrame
 
 local ListLayout = Instance.new("UIListLayout")
@@ -157,6 +165,7 @@ MiniOpenPanel.Position = UDim2.new(1, 10, 0, 50)
 MiniOpenPanel.BackgroundColor3 = Color3.fromRGB(25, 30, 43)
 MiniOpenPanel.BorderSizePixel = 0
 MiniOpenPanel.Visible = false
+MiniOpenPanel.ZIndex = 10
 MiniOpenPanel.Parent = MainFrame
 Instance.new("UICorner", MiniOpenPanel).CornerRadius = UDim.new(0, 8)
 
@@ -168,6 +177,7 @@ MiniTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 MiniTitle.Font = Enum.Font.GothamBold
 MiniTitle.TextSize = 9
 MiniTitle.TextXAlignment = Enum.TextXAlignment.Left
+MiniTitle.ZIndex = 11
 MiniTitle.Parent = MiniOpenPanel
 Instance.new("UICorner", MiniTitle).CornerRadius = UDim.new(0, 8)
 
@@ -178,6 +188,7 @@ MiniScroll.BackgroundTransparency = 1
 MiniScroll.ScrollBarThickness = 3
 MiniScroll.ScrollBarImageColor3 = Color3.fromRGB(46, 204, 113)
 MiniScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+MiniScroll.ZIndex = 11
 MiniScroll.Parent = MiniOpenPanel
 
 local MiniListLayout = Instance.new("UIListLayout")
@@ -273,16 +284,14 @@ local function applyGameOutfitStructure(itemsArray)
         Net.send("ClearOutfit")
         Net.send("wear_outfit_from_desc", { ["accessories"] = {}, ["properties"] = { ["Shirt"] = 0, ["Pants"] = 0 } })
     end)
-    task.wait(0.5)
-
-    if type(itemsArray) == "table" then
-        for _, item in ipairs(itemsArray) do
-            local assetId = tonumber(item.id)
-            local category = tostring(item.category)
-
-            if assetId and assetId ~= 0 then
-                pcall(function()
-            if category == "Shirt" or category == "T-Shirt" then
+task.wait(0.5)
+if type(itemsArray) == "table" then
+for _, item in ipairs(itemsArray) do
+local assetId = tonumber(item.id)
+local category = tostring(item.category)
+if assetId and assetId ~= 0 then
+pcall(function()
+if category == "Shirt" or category == "T-Shirt" then
 Net.send("UpdateOutfit", "Shirt", assetId)
 Net.get("code", assetId, "Shirt")
 elseif category == "Pants" or category == "Shorts" then
@@ -295,12 +304,10 @@ elseif category == "Face" then
 Net.send("UpdateOutfit", "Face", assetId)
 Net.get("code", assetId, "Face")
 elseif category:find("BodyPart:") then
--- FIX: Firing body structure tokens to native server components
 local exactPartName = category:gsub("BodyPart:", "")
 Net.send("UpdateOutfit", exactPartName, assetId)
 Net.get("code", assetId, exactPartName)
 elseif category == "HeightScale" or category == "WidthScale" then
--- FIX: Firing body proportions scales parameters
 Net.send("body_scale", category, assetId)
 else
 Net.send("UpdateOutfit", "Accessory", assetId)
@@ -326,6 +333,7 @@ if assetId ~= 0 and not labelType:find("Scale") then
 local itemRow = Instance.new("Frame")
 itemRow.Size = UDim2.new(1, -4, 0, 40)
 itemRow.BackgroundColor3 = Color3.fromRGB(34, 41, 56)
+itemRow.ZIndex = 12
 itemRow.Parent = MiniScroll
 Instance.new("UICorner", itemRow).CornerRadius = UDim.new(0, 5)
 local img = Instance.new("ImageLabel")
@@ -333,6 +341,7 @@ img.Size = UDim2.new(0, 30, 0, 30)
 img.Position = UDim2.new(0, 5, 0, 5)
 img.BackgroundColor3 = Color3.fromRGB(20, 24, 33)
 img.Image = "rbxthumb://type=Asset&id=" .. tostring(assetId) .. "&w=150&h=150"
+img.ZIndex = 13
 img.Parent = itemRow
 Instance.new("UICorner", img).CornerRadius = UDim.new(0, 4)
 local txt = Instance.new("TextLabel")
@@ -345,6 +354,7 @@ txt.Font = Enum.Font.GothamMedium
 txt.TextSize = 8
 txt.TextWrapped = true
 txt.TextXAlignment = Enum.TextXAlignment.Left
+txt.ZIndex = 13
 txt.Parent = itemRow
 local cp = Instance.new("TextButton")
 cp.Size = UDim2.new(0, 24, 0, 24)
@@ -354,6 +364,7 @@ cp.Text = "📋"
 cp.TextColor3 = Color3.fromRGB(255, 255, 255)
 cp.Font = Enum.Font.GothamBold
 cp.TextSize = 10
+cp.ZIndex = 13
 cp.Parent = itemRow
 Instance.new("UICorner", cp).CornerRadius = UDim.new(0, 4)
 cp.MouseButton1Click:Connect(function()
@@ -388,14 +399,16 @@ for idx, data in ipairs(StorageData.outfits) do
 local cardFrame = Instance.new("Frame")
 cardFrame.Size = UDim2.new(1, -4, 0, 52)
 cardFrame.BackgroundColor3 = Color3.fromRGB(30, 37, 51)
+cardFrame.ZIndex = 7
 cardFrame.Parent = ScrollFrame
 Instance.new("UICorner", cardFrame).CornerRadius = UDim.new(0, 6)
--- NEW ADDITION: Live Headshot Profile Image Preview Loader inside your red circle segment
+-- Live Headshot Profile Image Preview Loader inside your red circle segment
 local playerPreviewImg = Instance.new("ImageLabel")
 playerPreviewImg.Size = UDim2.new(0, 42, 0, 42)
 playerPreviewImg.Position = UDim2.new(0, 6, 0, 5)
 playerPreviewImg.BackgroundColor3 = Color3.fromRGB(20, 24, 33)
 playerPreviewImg.Image = "rbxthumb://type=AvatarHeadShot&id=" .. tostring(LocalPlayer.UserId) .. "&w=150&h=150"
+playerPreviewImg.ZIndex = 8
 playerPreviewImg.Parent = cardFrame
 Instance.new("UICorner", playerPreviewImg).CornerRadius = UDim.new(0, 6)
 local nameEditor = Instance.new("TextBox")
@@ -408,6 +421,7 @@ nameEditor.Font = Enum.Font.GothamBold
 nameEditor.TextSize = 11
 nameEditor.TextXAlignment = Enum.TextXAlignment.Left
 nameEditor.ClearTextOnFocus = false
+nameEditor.ZIndex = 8
 nameEditor.Parent = cardFrame
 nameEditor.FocusLost:Connect(function()
 if nameEditor.Text ~= "" then
@@ -424,6 +438,7 @@ codeLabel.TextColor3 = Color3.fromRGB(0, 136, 255)
 codeLabel.Font = Enum.Font.GothamMedium
 codeLabel.TextSize = 9
 codeLabel.TextXAlignment = Enum.TextXAlignment.Left
+codeLabel.ZIndex = 8
 codeLabel.Parent = cardFrame
 -- 1. OPEN Button
 local openBtn = Instance.new("TextButton")
@@ -434,6 +449,7 @@ openBtn.Text = "OPEN"
 openBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 openBtn.Font = Enum.Font.GothamBold
 openBtn.TextSize = 10
+openBtn.ZIndex = 8
 openBtn.Parent = cardFrame
 Instance.new("UICorner", openBtn).CornerRadius = UDim.new(0, 4)
 openBtn.MouseButton1Click:Connect(function()
@@ -446,7 +462,6 @@ MiniOpenPanel.Visible = true
 popMiniPanelItems(data.structureData)
 end
 end)
-
 -- 2. WEAR Button
 local wearBtn = Instance.new("TextButton")
 wearBtn.Size = UDim2.new(0, 46, 0, 26)
@@ -456,6 +471,7 @@ wearBtn.Text = "WEAR"
 wearBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 wearBtn.Font = Enum.Font.GothamBold
 wearBtn.TextSize = 10
+wearBtn.ZIndex = 8
 wearBtn.Parent = cardFrame
 Instance.new("UICorner", wearBtn).CornerRadius = UDim.new(0, 4)
 wearBtn.MouseButton1Click:Connect(function()
@@ -475,6 +491,7 @@ delBtn.Text = "DEL"
 delBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 delBtn.Font = Enum.Font.GothamBold
 delBtn.TextSize = 10
+delBtn.ZIndex = 8
 delBtn.Parent = cardFrame
 Instance.new("UICorner", delBtn).CornerRadius = UDim.new(0, 4)
 delBtn.MouseButton1Click:Connect(function()
@@ -483,6 +500,7 @@ WarnFrame.Visible = true
 end)
 end
 end
+
 -- Warning Pop-Up Control Closures
 YesBtn.MouseButton1Click:Connect(function()
 if pendingDeleteIdx then
@@ -545,7 +563,6 @@ category = tostring(acc.AccessoryType and acc.AccessoryType.Name or "Accessory")
 end
 end
 end
-
 table.insert(StorageData.outfits, {
 name = nameText,
 code = "ZM_" .. string.upper(HttpService:GenerateGUID(false):sub(1,4)),
